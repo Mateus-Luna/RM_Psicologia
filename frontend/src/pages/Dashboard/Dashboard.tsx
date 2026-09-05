@@ -1,50 +1,53 @@
-import { useNavigate } from 'react-router-dom';
+import { Users, CalendarDays } from 'lucide-react';
+
+import { AppLayout } from '../../components/layout/AppLayout';
 
 export function Dashboard() {
-  const navigate = useNavigate();
-
-  const storedUser = sessionStorage.getItem('rentao_psic_user');
-
-  const user = storedUser ? JSON.parse(storedUser) : null;
-
-  function handleLogout() {
-    sessionStorage.removeItem('rentao_psic_user');
-    navigate('/login');
-  }
-
   return (
-    <div>
-      <header>
-        <div>
-          <h1>Rentao Psic</h1>
-        </div>
-
-        <div>
-          <span>
-            {user?.name ?? 'Usuário'}
-          </span>
-
-          <button type="button" onClick={handleLogout}>
-            Sair
-          </button>
-        </div>
-      </header>
-
-      <main>
-        <h2>Olá, {user?.name ?? 'usuário'}!</h2>
-
-        <p>
-          Bem-vindo ao Renato Psic.
-        </p>
-
-        <section>
-          <h3>Visão geral</h3>
+    <AppLayout>
+      <section className="dashboard">
+        <div className="dashboard-welcome">
+          <h2>Visão geral</h2>
 
           <p>
-            O sistema está pronto para começar a ser configurado.
+            Acompanhe os principais dados do seu consultório.
           </p>
-        </section>
-      </main>
-    </div>
+        </div>
+
+        <div className="dashboard-cards">
+          <article className="dashboard-card">
+            <div className="dashboard-card-icon">
+              <Users size={24} strokeWidth={1.8} />
+            </div>
+
+            <div>
+              <span className="dashboard-card-label">
+                Pacientes
+              </span>
+
+              <strong className="dashboard-card-value">
+                0
+              </strong>
+            </div>
+          </article>
+
+          <article className="dashboard-card">
+            <div className="dashboard-card-icon">
+              <CalendarDays size={24} strokeWidth={1.8} />
+            </div>
+
+            <div>
+              <span className="dashboard-card-label">
+                Atendimentos hoje
+              </span>
+
+              <strong className="dashboard-card-value">
+                0
+              </strong>
+            </div>
+          </article>
+        </div>
+      </section>
+    </AppLayout>
   );
 }
