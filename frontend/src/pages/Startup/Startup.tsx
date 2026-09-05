@@ -8,7 +8,7 @@ export function Startup() {
   useEffect(() => {
     async function checkSetup() {
       try {
-        const storedUser = sessionStorage.getItem('rentao_psic_user');
+        const storedUser = sessionStorage.getItem('renato_psic_user');
 
         if (storedUser) {
           navigate('/dashboard', { replace: true });

@@ -21,7 +21,7 @@ export function Login() {
       });
 
       sessionStorage.setItem(
-        'rentao_psic_user',
+        'renato_psic_user',
         JSON.stringify(response.data),
       );
 

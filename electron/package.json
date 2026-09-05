@@ -1,0 +1,22 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.cjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
+    "electron": "^44.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "cross-env": "^10.1.0"
+  }
+}
