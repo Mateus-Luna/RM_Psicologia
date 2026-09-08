@@ -6,9 +6,11 @@ import { Sidebar } from './Sidebar';
 
 interface AppLayoutProps {
   children: ReactNode;
+  title?: string;
+  subtitle?: string;
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
   const navigate = useNavigate();
 
   const storedUser = sessionStorage.getItem('renato_psic_user');
@@ -27,7 +29,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       <Sidebar onLogout={handleLogout} />
 
       <div className="app-content">
-        <Header userName={user?.name ?? 'usuário'} />
+        <Header
+          userName={user?.name ?? 'usuário'}
+          title={title}
+          subtitle={subtitle}
+        />
 
         <main className="app-main">
           {children}

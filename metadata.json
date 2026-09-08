@@ -1,0 +1,6 @@
+{
+  "name": "RM Psicologia",
+  "description": "Sistema para psicólogo com cadastro de pacientes, prontuário e agenda.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,8 +1,27 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, CalendarDays } from 'lucide-react';
 
 import { AppLayout } from '../../components/layout/AppLayout';
+import { patientsService } from '../../services/patients.service';
 
 export function Dashboard() {
+  const navigate = useNavigate();
+  const [patientCount, setPatientCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const patients = await patientsService.getPatients();
+        setPatientCount(patients.length);
+      } catch {
+        setPatientCount(0);
+      }
+    }
+
+    loadStats();
+  }, []);
+
   return (
     <AppLayout>
       <section className="dashboard">
@@ -15,18 +34,23 @@ export function Dashboard() {
         </div>
 
         <div className="dashboard-cards">
-          <article className="dashboard-card">
+          <article
+            className="dashboard-card"
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/patients')}
+            id="dashboard-patients-card"
+          >
             <div className="dashboard-card-icon">
               <Users size={24} strokeWidth={1.8} />
             </div>
 
             <div>
               <span className="dashboard-card-label">
-                Pacientes
+                Pacientes ativos
               </span>
 
               <strong className="dashboard-card-value">
-                0
+                {patientCount !== null ? patientCount : '...'}
               </strong>
             </div>
           </article>
