@@ -23,8 +23,8 @@ export function Startup() {
           navigate('/setup', { replace: true });
         }
       } catch {
-        // Vamos tratar a indisponibilidade do backend
-        // de forma visual posteriormente.
+        // Se houver erro ou backend indisponível, direciona para configuração inicial
+        navigate('/setup', { replace: true });
       }
     }
 

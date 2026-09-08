@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "name": "Maria da Silva",
+    "cpf": "12345678901",
+    "phone": "11987654321",
+    "birthDate": "1992-05-14",
+    "treatmentStartDate": "2024-02-01",
+    "diagnosticHypothesis": "Ansiedade generalizada",
+    "hasMedicalFollowUp": true,
+    "doctorName": "Dr. Roberto Psiquiatra",
+    "generalNotes": null,
+    "isActive": false,
+    "medications": [
+      {
+        "id": 1,
+        "name": "Sertralina",
+        "notes": "100mg pela manhã",
+        "isActive": true,
+        "startedAt": "2026-09-08T22:16:02.903Z",
+        "endedAt": null
+      },
+      {
+        "id": 2,
+        "name": "Zolpidem",
+        "notes": "10mg se insônia",
+        "isActive": true,
+        "startedAt": "2026-09-08T22:16:14.379Z",
+        "endedAt": null
+      }
+    ],
+    "createdAt": "2026-09-08T22:16:02.903Z",
+    "updatedAt": "2026-09-08T22:16:14.379Z"
+  }
+]

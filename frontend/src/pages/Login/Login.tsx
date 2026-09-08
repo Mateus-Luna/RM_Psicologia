@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { api } from '../../services/api';
 
 export function Login() {
@@ -26,13 +27,14 @@ export function Login() {
       );
 
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error.response?.data?.message ||
-        'Não foi possível realizar o login.';
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? (error.response.data.message as string | string[])
+          : 'Não foi possível realizar o login.';
 
       setError(
-        Array.isArray(message) ? message.join(', ') : message,
+        Array.isArray(message) ? message.join(', ') : String(message),
       );
     } finally {
       setLoading(false);
