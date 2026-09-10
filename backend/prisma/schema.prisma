@@ -43,6 +43,7 @@ model Patient {
   updatedAt DateTime @updatedAt
 
   medications PatientMedication[]
+  medicalRecordEntries MedicalRecordEntry[]
 }
 
 model PatientMedication {
@@ -64,4 +65,27 @@ model PatientMedication {
 
   @@index([patientId])
   @@index([name])
+}
+
+model MedicalRecordEntry {
+  id Int @id @default(autoincrement())
+
+  patientId Int
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  type MedicalRecordEntryType
+
+  entryDate DateTime
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([patientId, entryDate])
+}
+
+enum MedicalRecordEntryType {
+  APPOINTMENT
+  GENERAL_NOTE
 }
