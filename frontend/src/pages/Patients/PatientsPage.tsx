@@ -33,7 +33,7 @@ export function PatientsPage() {
 
     try {
       const data = await patientsService.getPatients(currentFilters);
-      setPatients(data);
+      setPatients(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
       const msg =
         axios.isAxiosError(err) && err.response?.data?.message

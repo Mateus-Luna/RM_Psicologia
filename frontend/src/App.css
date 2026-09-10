@@ -921,3 +921,597 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ========================================
+   PATIENT SUMMARY BANNER & TABS
+   ======================================== */
+.patient-summary-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 8px;
+}
+
+.summary-banner-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-banner-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.summary-banner-value {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.patient-tabs-nav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.patient-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.patient-tab-btn:hover {
+  color: var(--primary);
+}
+
+.patient-tab-btn.active {
+  color: var(--primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary);
+}
+
+.tab-count-badge {
+  background: #e0f2fe;
+  color: var(--primary);
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ========================================
+   MEDICAL RECORDS SECTION & TIMELINE
+   ======================================== */
+.medical-records-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.medical-records-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.medical-records-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.print-dropdown-menu {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 6px 0;
+  min-width: 230px;
+  display: flex;
+  flex-direction: column;
+}
+
+.print-dropdown-item {
+  padding: 9px 16px;
+  font-size: 13px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.print-dropdown-item:hover {
+  background: #f1f5f9;
+  color: var(--primary);
+}
+
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px dashed var(--border);
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+/* ========================================
+   MEDICAL RECORDS FILTERS (VERTICAL TYPE BUTTONS)
+   ======================================== */
+
+.medical-records-filters-grid {
+  align-items: flex-start;
+}
+
+.record-type-button-stack,
+.segmented-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.record-type-filter-btn,
+.segmented-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.record-type-filter-btn:hover,
+.segmented-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #cbd5e1;
+}
+
+.record-type-filter-btn.active,
+.segmented-btn.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+}
+
+.record-type-filter-btn.active.active-appointment,
+.segmented-btn.active.active-appointment {
+  background: #eff6ff;
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+.record-type-filter-btn.active.active-general-note,
+.segmented-btn.active.active-general-note {
+  background: #f5f3ff;
+  border-color: #8b5cf6;
+  color: #6d28d9;
+}
+
+/* CARDS */
+.records-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.medical-record-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+}
+
+.medical-record-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.medical-record-card.card-appointment {
+  border-left: 4px solid var(--primary);
+}
+
+.medical-record-card.card-general-note {
+  border-left: 4px solid #8b5cf6;
+}
+
+.record-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.record-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.record-date-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.badge-general-note {
+  background: #f3e8ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.record-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.record-card-body {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.record-content-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+.record-card-footer {
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* RECORD MODAL */
+.modal-content-lg {
+  max-width: 720px;
+  width: 90%;
+}
+
+.record-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.record-type-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+}
+
+.record-type-option:hover {
+  border-color: var(--primary);
+}
+
+.record-type-option.selected {
+  border-color: var(--primary);
+  background: #f0fdfa;
+}
+
+.record-type-option input[type="radio"] {
+  margin-top: 2px;
+}
+
+.record-type-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.record-type-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.record-type-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.record-textarea {
+  min-height: 220px;
+  line-height: 1.6;
+  font-size: 14px;
+  resize: vertical;
+}
+
+/* ========================================
+   PRINTING SPECIFIC STYLES
+   ======================================== */
+@media screen {
+  .print-document,
+  #medical-record-print-document {
+    display: none !important;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Hide entire application shell */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the print document */
+  #medical-record-print-document,
+  #medical-record-print-document * {
+    visibility: visible;
+  }
+
+  #medical-record-print-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff !important;
+    color: #000000 !important;
+    display: block !important;
+  }
+
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #000000;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .print-clinic-name {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #000000;
+    margin: 0;
+  }
+
+  .print-clinic-subtitle {
+    font-size: 9.5pt;
+    color: #444444;
+    margin: 2px 0 0 0;
+  }
+
+  .print-document-badge {
+    font-size: 8pt;
+    font-weight: bold;
+    border: 1px solid #000000;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .print-title-section {
+    margin-bottom: 14px;
+  }
+
+  .print-document-title {
+    font-size: 13pt;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+  }
+
+  .print-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: #555555;
+    margin-top: 4px;
+  }
+
+  .print-patient-box {
+    border: 1px solid #999999;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    background: #fafafa !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-patient-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    font-size: 9.5pt;
+  }
+
+  .print-label {
+    font-weight: bold;
+    color: #333333;
+    margin-right: 6px;
+  }
+
+  .print-value {
+    color: #000000;
+  }
+
+  .print-patient-name {
+    font-size: 10.5pt;
+    font-weight: bold;
+  }
+
+  .print-entries-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .print-entry-item {
+    border: 1px solid #cccccc;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-entry-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    font-size: 9.5pt;
+  }
+
+  .print-entry-header-left {
+    display: flex;
+    gap: 8px;
+  }
+
+  .print-entry-index {
+    font-weight: bold;
+  }
+
+  .print-entry-date {
+    font-weight: bold;
+  }
+
+  .print-type-badge {
+    font-size: 8.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border: 1px solid #888888;
+    border-radius: 3px;
+  }
+
+  .print-entry-body {
+    font-size: 10pt;
+    line-height: 1.5;
+    margin: 8px 0;
+  }
+
+  .print-entry-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+  }
+
+  .print-entry-footer {
+    font-size: 8pt;
+    color: #777777;
+    margin-top: 6px;
+    border-top: 1px dotted #e0e0e0;
+    padding-top: 4px;
+  }
+
+  .print-signature-section {
+    margin-top: 40px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    display: flex;
+    justify-content: center;
+  }
+
+  .print-signature-box {
+    width: 320px;
+    text-align: center;
+  }
+
+  .print-signature-line {
+    border-top: 1px solid #000000;
+    margin-bottom: 6px;
+  }
+
+  .print-signature-name {
+    font-size: 9.5pt;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .print-signature-crp {
+    font-size: 8.5pt;
+    color: #444444;
+    margin: 2px 0;
+  }
+
+  .print-signature-date {
+    font-size: 7.5pt;
+    color: #888888;
+    margin-top: 4px;
+  }
+}

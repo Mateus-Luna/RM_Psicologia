@@ -12,6 +12,7 @@ import { Startup } from '../pages/Startup/Startup';
 import { PatientsPage } from '../pages/Patients/PatientsPage';
 import { PatientFormPage } from '../pages/Patients/PatientFormPage';
 import { PatientDetailsPage } from '../pages/Patients/PatientDetailsPage';
+import { RecordsSelectPatientPage } from '../pages/Records/RecordsSelectPatientPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export function AppRoutes() {
@@ -29,7 +30,12 @@ export function AppRoutes() {
           <Route path="/patients" element={<PatientsPage />} />
           <Route path="/patients/new" element={<PatientFormPage />} />
           <Route path="/patients/:id" element={<PatientDetailsPage />} />
+          <Route
+            path="/patients/:id/medical-records"
+            element={<PatientDetailsPage defaultTab="prontuario" />}
+          />
           <Route path="/patients/:id/edit" element={<PatientFormPage />} />
+          <Route path="/records" element={<RecordsSelectPatientPage />} />
         </Route>
 
         <Route

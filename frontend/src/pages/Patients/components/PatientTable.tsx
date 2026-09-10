@@ -1,4 +1,4 @@
-import { Eye, Pencil, Trash2, Pill, Stethoscope } from 'lucide-react';
+import { Eye, Pencil, Trash2, Pill, Stethoscope, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Patient } from '../../../types/patient';
 import { formatCPF, formatDate, formatPhone } from '../../../utils/formatters';
@@ -114,6 +114,14 @@ export function PatientTable({
                       className="table-actions"
                       style={{ justifyContent: 'flex-end' }}
                     >
+                      <Link
+                        to={`/patients/${patient.id}?tab=prontuario`}
+                        className="btn-icon"
+                        id={`prontuario-patient-${patient.id}`}
+                        title="Acessar prontuário"
+                      >
+                        <ClipboardList size={17} />
+                      </Link>
                       <Link
                         to={`/patients/${patient.id}`}
                         className="btn-icon"

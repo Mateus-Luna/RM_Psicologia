@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -56,5 +57,13 @@ export class MedicalRecordsController {
       id,
       updateDto,
     );
+  }
+
+  @Delete(':id')
+  remove(
+    @Param('patientId', ParseIntPipe) patientId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.medicalRecordsService.remove(patientId, id);
   }
 }

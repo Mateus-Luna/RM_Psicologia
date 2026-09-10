@@ -63,3 +63,54 @@ export function cleanPhone(value?: string | null): string {
   if (!value) return '';
   return value.replace(/\D/g, '');
 }
+
+/**
+ * Formats an ISO date-time string to Brazilian DD/MM/YYYY às HH:mm format
+ */
+export function formatDateTime(dateString?: string | null): string {
+  if (!dateString) return '-';
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+
+    return `${day}/${month}/${year} às ${hours}:${minutes}`;
+  } catch {
+    return dateString;
+  }
+}
+
+/**
+ * Extracts HH:mm format suitable for HTML5 <input type="time">
+ */
+export function toInputTime(dateString?: string | null): string {
+  if (!dateString) {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '09:00';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  } catch {
+    return '09:00';
+  }
+}
+
+/**
+ * Combines YYYY-MM-DD and HH:mm into an ISO 8601 string
+ */
+export function combineDateAndTime(date: string, time?: string): string {
+  const safeTime = time && time.trim() ? time.trim() : '09:00';
+  const localDate = new Date(`${date}T${safeTime}:00`);
+  return localDate.toISOString();
+}

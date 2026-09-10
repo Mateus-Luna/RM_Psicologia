@@ -10,7 +10,7 @@
     "hasMedicalFollowUp": true,
     "doctorName": "Dr. Roberto Psiquiatra",
     "generalNotes": null,
-    "isActive": false,
+    "isActive": true,
     "medications": [
       {
         "id": 1,
