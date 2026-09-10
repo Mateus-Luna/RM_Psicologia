@@ -133,4 +133,14 @@ export class MedicalRecordsService {
       },
     });
   }
+
+  async remove(patientId: number, id: number) {
+    await this.findOne(patientId, id);
+
+    return this.prisma.medicalRecordEntry.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }

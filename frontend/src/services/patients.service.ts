@@ -33,7 +33,7 @@ export const patientsService = {
     }
 
     const response = await api.get<Patient[]>('/patients', { params });
-    return response.data;
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   async getPatient(id: number): Promise<Patient> {

@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "type": "APPOINTMENT",
+    "entryDate": "2026-09-02T14:00:00.000Z",
+    "content": "Primeira sessão de acolhimento e anamnese inicial.\nPaciente relata histórico de episódios de ansiedade intensa e insônia inicial nas últimas semanas, com impacto em suas atividades laborais. Foi iniciado acompanhamento psiquiátrico com prescrição de Sertralina e Zolpidem.\nEstabelecido contrato terapêutico e alinhada periodicidade semanal para o processo psicoterapêutico.",
+    "createdAt": "2026-09-02T15:00:00.000Z",
+    "updatedAt": "2026-09-02T15:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "patientId": 1,
+    "type": "APPOINTMENT",
+    "entryDate": "2026-09-09T14:00:00.000Z",
+    "content": "Segunda sessão clínica.\nAvaliação da resposta inicial à medicação prescrita pelo psiquiatra. Paciente relata leve redução da insônia e melhor disposição matinal, embora ainda sinta taquicardia em momentos de sobrecarga no trabalho.\nTrabalhadas técnicas de respiração diafragmática e identificação de pensamentos automáticos disfuncionais. Proposta tarefa de registro de humor.",
+    "createdAt": "2026-09-09T15:00:00.000Z",
+    "updatedAt": "2026-09-09T15:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "patientId": 1,
+    "type": "GENERAL_NOTE",
+    "entryDate": "2026-09-10T10:30:00.000Z",
+    "content": "Anotação de alinhamento multiprofissional: Contato telefônico com o psiquiatra assistente Dr. Roberto. Discutida a evolução do quadro e confirmada manutenção da dosagem de Sertralina 100mg. Próximo retorno psiquiátrico agendado para daqui a 30 dias.",
+    "createdAt": "2026-09-10T10:45:00.000Z",
+    "updatedAt": "2026-09-10T10:45:00.000Z"
+  }
+]

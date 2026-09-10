@@ -7,9 +7,20 @@ export const api = axios.create({
   },
 });
 
-// Fallback interceptor for offline/desktop behavior
+// Interceptor to reject unexpected HTML fallback responses from SPA server
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (
+      typeof response.data === 'string' &&
+      (response.data.trim().startsWith('<!doctype') ||
+        response.data.trim().startsWith('<html'))
+    ) {
+      return Promise.reject(
+        new Error('Resposta inesperada da API (documento HTML recebido).'),
+      );
+    }
+    return response;
+  },
   async (error) => {
     const config = error.config;
     if (!config) return Promise.reject(error);
