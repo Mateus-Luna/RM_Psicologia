@@ -522,7 +522,7 @@ export function MedicalRecordSection({
                     id="empty-new-record-btn"
                   >
                     <Plus size={16} />
-                    <span>+ Novo registro</span>
+                    <span>Novo registro</span>
                   </button>
                 </>
               )}

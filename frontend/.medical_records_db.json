@@ -25,5 +25,23 @@
     "content": "Anotação de alinhamento multiprofissional: Contato telefônico com o psiquiatra assistente Dr. Roberto. Discutida a evolução do quadro e confirmada manutenção da dosagem de Sertralina 100mg. Próximo retorno psiquiátrico agendado para daqui a 30 dias.",
     "createdAt": "2026-09-10T10:45:00.000Z",
     "updatedAt": "2026-09-10T10:45:00.000Z"
+  },
+  {
+    "id": 4,
+    "patientId": 2,
+    "type": "APPOINTMENT",
+    "entryDate": "2026-09-14T15:47:00.000Z",
+    "content": "Escrevendo algo para testar a impressão",
+    "createdAt": "2026-09-14T15:47:38.665Z",
+    "updatedAt": "2026-09-14T15:47:38.665Z"
+  },
+  {
+    "id": 5,
+    "patientId": 2,
+    "type": "APPOINTMENT",
+    "entryDate": "2026-09-14T15:47:00.000Z",
+    "content": "Escrevendo outra coisa",
+    "createdAt": "2026-09-14T15:47:59.188Z",
+    "updatedAt": "2026-09-14T15:47:59.188Z"
   }
 ]

@@ -31,5 +31,38 @@
     ],
     "createdAt": "2026-09-08T22:16:02.903Z",
     "updatedAt": "2026-09-08T22:16:14.379Z"
+  },
+  {
+    "id": 2,
+    "name": "Mateus Medeiros",
+    "cpf": "09911044111",
+    "phone": "83996667777",
+    "birthDate": "2001-12-10",
+    "treatmentStartDate": "2026-09-01",
+    "diagnosticHypothesis": "ansiedade",
+    "hasMedicalFollowUp": true,
+    "doctorName": "Stefan",
+    "generalNotes": "sei la",
+    "isActive": true,
+    "medications": [
+      {
+        "id": 1,
+        "name": "quetiapina",
+        "notes": "50mg",
+        "isActive": true,
+        "startedAt": "2026-09-02",
+        "endedAt": null
+      },
+      {
+        "id": 2,
+        "name": "sertralina",
+        "notes": "100",
+        "isActive": true,
+        "startedAt": "2026-09-03",
+        "endedAt": null
+      }
+    ],
+    "createdAt": "2026-09-10T22:54:01.137Z",
+    "updatedAt": "2026-09-10T22:54:01.137Z"
   }
 ]

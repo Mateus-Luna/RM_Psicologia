@@ -44,6 +44,7 @@ model Patient {
 
   medications PatientMedication[]
   medicalRecordEntries MedicalRecordEntry[]
+  appointments Appointment[]
 }
 
 model PatientMedication {
@@ -88,4 +89,37 @@ model MedicalRecordEntry {
 enum MedicalRecordEntryType {
   APPOINTMENT
   GENERAL_NOTE
+}
+
+model Appointment {
+  id Int @id @default(autoincrement())
+
+  patientId Int
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  startAt DateTime
+  endAt   DateTime
+
+  status AppointmentStatus @default(SCHEDULED)
+
+  confirmed Boolean @default(false)
+
+  notes String?
+
+  recurrenceId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([startAt])
+  @@index([status])
+  @@index([recurrenceId])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }
