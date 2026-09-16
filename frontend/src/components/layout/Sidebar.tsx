@@ -27,7 +27,7 @@ const menuItems = [
   },
   {
     label: 'Agenda',
-    path: '/appointments',
+    path: '/agenda',
     icon: CalendarDays,
   },
   {
