@@ -4,10 +4,16 @@ import { Users, CalendarDays } from 'lucide-react';
 
 import { AppLayout } from '../../components/layout/AppLayout';
 import { patientsService } from '../../services/patients.service';
+import { appointmentsService } from '../../services/appointments.service';
+import { AppointmentStatus } from '../../types/appointment';
+import { toInputDate } from '../../utils/formatters';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const [patientCount, setPatientCount] = useState<number | null>(null);
+  const [todayAppointmentsCount, setTodayAppointmentsCount] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     async function loadStats() {
@@ -16,6 +22,19 @@ export function Dashboard() {
         setPatientCount(patients.length);
       } catch {
         setPatientCount(0);
+      }
+
+      try {
+        const todayStr = toInputDate(new Date().toISOString());
+        const apps = await appointmentsService.getAppointments();
+        const count = apps.filter(
+          (a) =>
+            a.startAt.startsWith(todayStr) &&
+            a.status !== AppointmentStatus.CANCELLED,
+        ).length;
+        setTodayAppointmentsCount(count);
+      } catch {
+        setTodayAppointmentsCount(0);
       }
     }
 
@@ -55,7 +74,12 @@ export function Dashboard() {
             </div>
           </article>
 
-          <article className="dashboard-card">
+          <article
+            className="dashboard-card"
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/agenda')}
+            id="dashboard-appointments-card"
+          >
             <div className="dashboard-card-icon">
               <CalendarDays size={24} strokeWidth={1.8} />
             </div>
@@ -66,7 +90,9 @@ export function Dashboard() {
               </span>
 
               <strong className="dashboard-card-value">
-                0
+                {todayAppointmentsCount !== null
+                  ? todayAppointmentsCount
+                  : '...'}
               </strong>
             </div>
           </article>

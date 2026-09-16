@@ -40,6 +40,30 @@ interface MockMedicalRecordEntry {
   updatedAt: string
 }
 
+interface MockAppointment {
+  id: number
+  patientId: number
+  patient?: MockPatient
+  startAt: string
+  endAt: string
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
+  confirmed: boolean
+  notes?: string | null
+  recurrenceId?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+interface AppointmentPayload {
+  patientId?: number
+  startAt?: string
+  endAt?: string
+  status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
+  confirmed?: boolean
+  notes?: string
+  recurrenceId?: string
+}
+
 interface PatientPayload {
   name?: string
   cpf?: string | null
@@ -97,6 +121,7 @@ function apiMockPlugin(): Plugin {
   const authDbPath = path.resolve(__dirname, '.auth_db.json')
   const patientsDbPath = path.resolve(__dirname, '.patients_db.json')
   const medicalRecordsDbPath = path.resolve(__dirname, '.medical_records_db.json')
+  const appointmentsDbPath = path.resolve(__dirname, '.appointments_db.json')
 
   function getUser() {
     try {
@@ -150,6 +175,25 @@ function apiMockPlugin(): Plugin {
   function saveMedicalRecords(list: MockMedicalRecordEntry[]) {
     try {
       fs.writeFileSync(medicalRecordsDbPath, JSON.stringify(list, null, 2), 'utf-8')
+    } catch {
+      // ignore
+    }
+  }
+
+  function getAppointments(): MockAppointment[] {
+    try {
+      if (fs.existsSync(appointmentsDbPath)) {
+        return JSON.parse(fs.readFileSync(appointmentsDbPath, 'utf-8'))
+      }
+    } catch {
+      return []
+    }
+    return []
+  }
+
+  function saveAppointments(list: MockAppointment[]) {
+    try {
+      fs.writeFileSync(appointmentsDbPath, JSON.stringify(list, null, 2), 'utf-8')
     } catch {
       // ignore
     }
@@ -541,6 +585,193 @@ function apiMockPlugin(): Plugin {
         list.push(newPatient)
         savePatients(list)
         return sendJson(res, 201, newPatient)
+      }
+    }
+
+    // 4. APPOINTMENT ROUTES
+    const appointmentActionMatch = pathname.match(
+      /^\/appointments\/(\d+)\/(confirm|cancel|complete|no-show)\/?$/,
+    )
+    if (appointmentActionMatch && method === 'PATCH') {
+      const appId = Number(appointmentActionMatch[1])
+      const action = appointmentActionMatch[2]
+      const appointments = getAppointments()
+      const patients = getPatients()
+      const appIndex = appointments.findIndex((a) => a.id === appId)
+      if (appIndex === -1) {
+        return sendJson(res, 404, { message: 'Agendamento não encontrado.' })
+      }
+
+      const current = appointments[appIndex]
+      if (action === 'confirm') {
+        current.confirmed = true
+      } else if (action === 'cancel') {
+        current.status = 'CANCELLED'
+      } else if (action === 'complete') {
+        current.status = 'COMPLETED'
+      } else if (action === 'no-show') {
+        current.status = 'NO_SHOW'
+      }
+
+      current.updatedAt = new Date().toISOString()
+      appointments[appIndex] = current
+      saveAppointments(appointments)
+
+      const patient = patients.find((p) => p.id === current.patientId)
+      return sendJson(res, 200, { ...current, patient })
+    }
+
+    const singleAppointmentMatch = pathname.match(/^\/appointments\/(\d+)\/?$/)
+    if (singleAppointmentMatch) {
+      const appId = Number(singleAppointmentMatch[1])
+      const appointments = getAppointments()
+      const patients = getPatients()
+      const appIndex = appointments.findIndex((a) => a.id === appId)
+
+      if (appIndex === -1) {
+        return sendJson(res, 404, { message: 'Agendamento não encontrado.' })
+      }
+
+      if (method === 'GET') {
+        const item = appointments[appIndex]
+        const patient = patients.find((p) => p.id === item.patientId)
+        return sendJson(res, 200, { ...item, patient })
+      }
+
+      if (method === 'PATCH') {
+        const data = (await parseBody(req)) as AppointmentPayload
+        const current = appointments[appIndex]
+
+        if (data.startAt && data.endAt) {
+          if (new Date(data.endAt) <= new Date(data.startAt)) {
+            return sendJson(res, 400, {
+              message:
+                'O horário de término deve ser posterior ao horário de início.',
+            })
+          }
+        } else if (data.startAt && !data.endAt) {
+          if (new Date(current.endAt) <= new Date(data.startAt)) {
+            return sendJson(res, 400, {
+              message:
+                'O horário de término deve ser posterior ao horário de início.',
+            })
+          }
+        } else if (!data.startAt && data.endAt) {
+          if (new Date(data.endAt) <= new Date(current.startAt)) {
+            return sendJson(res, 400, {
+              message:
+                'O horário de término deve ser posterior ao horário de início.',
+            })
+          }
+        }
+
+        appointments[appIndex] = {
+          ...current,
+          ...(data.startAt ? { startAt: data.startAt } : {}),
+          ...(data.endAt ? { endAt: data.endAt } : {}),
+          ...(data.status ? { status: data.status } : {}),
+          ...(data.confirmed !== undefined
+            ? { confirmed: data.confirmed }
+            : {}),
+          ...(data.notes !== undefined ? { notes: data.notes } : {}),
+          ...(data.recurrenceId !== undefined
+            ? { recurrenceId: data.recurrenceId }
+            : {}),
+          updatedAt: new Date().toISOString(),
+        }
+        saveAppointments(appointments)
+
+        const patient = patients.find(
+          (p) => p.id === appointments[appIndex].patientId,
+        )
+        return sendJson(res, 200, { ...appointments[appIndex], patient })
+      }
+    }
+
+    if (pathname === '/appointments' || pathname === '/appointments/') {
+      const appointments = getAppointments()
+      const patients = getPatients()
+
+      if (method === 'GET') {
+        const startDate = parsedUrl.searchParams.get('startDate')
+        const endDate = parsedUrl.searchParams.get('endDate')
+        const status = parsedUrl.searchParams.get('status')
+        const patientName = parsedUrl.searchParams
+          .get('patientName')
+          ?.toLowerCase()
+
+        let filtered = appointments.map((app) => ({
+          ...app,
+          patient: patients.find((p) => p.id === app.patientId),
+        }))
+
+        if (startDate) {
+          const startIso = new Date(startDate).toISOString()
+          filtered = filtered.filter((app) => app.startAt >= startIso)
+        }
+        if (endDate) {
+          const endIso = new Date(endDate).toISOString()
+          filtered = filtered.filter((app) => app.startAt <= endIso)
+        }
+        if (status) {
+          filtered = filtered.filter((app) => app.status === status)
+        }
+        if (patientName) {
+          filtered = filtered.filter((app) =>
+            app.patient?.name.toLowerCase().includes(patientName),
+          )
+        }
+
+        filtered.sort(
+          (a, b) =>
+            new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+        )
+        return sendJson(res, 200, filtered)
+      }
+
+      if (method === 'POST') {
+        const data = (await parseBody(req)) as AppointmentPayload
+        if (!data.patientId) {
+          return sendJson(res, 400, { message: 'O paciente é obrigatório.' })
+        }
+        if (!data.startAt || !data.endAt) {
+          return sendJson(res, 400, {
+            message: 'Os horários de início e término são obrigatórios.',
+          })
+        }
+        if (new Date(data.endAt) <= new Date(data.startAt)) {
+          return sendJson(res, 400, {
+            message:
+              'O horário de término deve ser posterior ao horário de início.',
+          })
+        }
+
+        const patient = patients.find((p) => p.id === data.patientId)
+        if (!patient) {
+          return sendJson(res, 404, { message: 'Paciente não encontrado.' })
+        }
+
+        const nextId =
+          appointments.length > 0
+            ? Math.max(...appointments.map((a) => a.id || 0)) + 1
+            : 1
+
+        const newAppointment: MockAppointment = {
+          id: nextId,
+          patientId: data.patientId,
+          startAt: data.startAt,
+          endAt: data.endAt,
+          status: data.status || 'SCHEDULED',
+          confirmed: data.confirmed ?? false,
+          notes: data.notes || null,
+          recurrenceId: data.recurrenceId || null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+
+        appointments.push(newAppointment)
+        saveAppointments(appointments)
+        return sendJson(res, 201, { ...newAppointment, patient })
       }
     }
 

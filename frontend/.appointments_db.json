@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "startAt": "2026-09-16T14:00:00.000Z",
+    "endAt": "2026-09-16T15:00:00.000Z",
+    "status": "SCHEDULED",
+    "confirmed": true,
+    "notes": "Sessão semanal de psicoterapia cognitivo-comportamental.",
+    "recurrenceId": "semanal-maria",
+    "createdAt": "2026-09-10T10:00:00.000Z",
+    "updatedAt": "2026-09-10T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "patientId": 2,
+    "startAt": "2026-09-16T15:30:00.000Z",
+    "endAt": "2026-09-16T16:30:00.000Z",
+    "status": "SCHEDULED",
+    "confirmed": false,
+    "notes": "Acompanhamento de manejo de ansiedade.",
+    "recurrenceId": null,
+    "createdAt": "2026-09-12T14:00:00.000Z",
+    "updatedAt": "2026-09-12T14:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "patientId": 1,
+    "startAt": "2026-09-18T10:00:00.000Z",
+    "endAt": "2026-09-18T11:00:00.000Z",
+    "status": "SCHEDULED",
+    "confirmed": true,
+    "notes": "Avaliação de resposta e exercícios de respiração.",
+    "recurrenceId": null,
+    "createdAt": "2026-09-13T09:00:00.000Z",
+    "updatedAt": "2026-09-13T09:00:00.000Z"
+  }
+]

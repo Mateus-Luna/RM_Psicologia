@@ -13,6 +13,7 @@ import { PatientsPage } from '../pages/Patients/PatientsPage';
 import { PatientFormPage } from '../pages/Patients/PatientFormPage';
 import { PatientDetailsPage } from '../pages/Patients/PatientDetailsPage';
 import { RecordsSelectPatientPage } from '../pages/Records/RecordsSelectPatientPage';
+import { AgendaPage } from '../pages/Agenda/AgendaPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export function AppRoutes() {
@@ -36,6 +37,8 @@ export function AppRoutes() {
           />
           <Route path="/patients/:id/edit" element={<PatientFormPage />} />
           <Route path="/records" element={<RecordsSelectPatientPage />} />
+          <Route path="/agenda" element={<AgendaPage />} />
+          <Route path="/appointments" element={<AgendaPage />} />
         </Route>
 
         <Route
