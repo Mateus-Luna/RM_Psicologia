@@ -1,15 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UsersService } from './users.service';
+import { AppointmentsService } from './appointments.service';
 import { PrismaService } from '../prisma/prisma.service';
 
-describe('UsersService', () => {
-  let service: UsersService;
+describe('AppointmentsService', () => {
+  let service: AppointmentsService;
 
   const prismaMock = {
-    user: {
+    patient: {
       findUnique: jest.fn(),
+    },
+    appointment: {
       create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
       update: jest.fn(),
     },
   };
@@ -17,7 +21,7 @@ describe('UsersService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService,
+        AppointmentsService,
         {
           provide: PrismaService,
           useValue: prismaMock,
@@ -25,7 +29,7 @@ describe('UsersService', () => {
       ],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get<AppointmentsService>(AppointmentsService);
 
     jest.clearAllMocks();
   });
