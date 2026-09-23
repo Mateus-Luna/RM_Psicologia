@@ -2437,3 +2437,191 @@
   border-radius: 12px;
 }
 
+/* ========================================
+   DASHBOARD NOTIFICATIONS
+   ======================================== */
+
+.dashboard-notifications-section {
+  margin-top: 24px;
+}
+
+.dashboard-notifications-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notifications-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notifications-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notifications-header-title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notifications-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notifications-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+.spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e2e8f0;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.notifications-error {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 6px 0;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+
+.notification-item-birthday {
+  background: #fffdf7;
+  border-color: #fef08a;
+  border-left: 4px solid #f59e0b;
+}
+
+.notification-item-empty {
+  background: #f8fafc;
+  border-color: var(--border);
+  align-items: center;
+}
+
+.notification-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.birthday-icon {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.notification-item-empty .birthday-icon {
+  background: #f1f5f9;
+  color: var(--text-muted);
+}
+
+.notification-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notification-section-title {
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notification-empty-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.notification-message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.notification-patient-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.notification-patient-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.notification-multi-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-patients-ul {
+  margin: 4px 0 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-patient-li {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+
