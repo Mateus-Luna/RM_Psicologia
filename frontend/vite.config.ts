@@ -387,6 +387,36 @@ function apiMockPlugin(): Plugin {
       }
     }
 
+        // 2.5. NOTIFICATIONS ROUTES
+    if (pathname === '/notifications/birthdays/today' && method === 'GET') {
+      const today = new Date()
+      const currentMonth = today.getMonth()
+      const currentDay = today.getDate()
+
+      const birthdays = getPatients()
+        .filter((patient) => {
+          if (patient.isActive === false || !patient.birthDate) {
+            return false
+          }
+
+          const birthDate = new Date(patient.birthDate)
+
+          return (
+            birthDate.getMonth() === currentMonth &&
+            birthDate.getDate() === currentDay
+          )
+        })
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((patient) => ({
+          id: patient.id,
+          name: patient.name,
+          birthDate: patient.birthDate,
+        }))
+
+      return sendJson(res, 200, birthdays)
+    }
+
+
     // 3. PATIENTS ROUTES
     const singlePatientMatch = pathname.match(/^\/patients\/(\d+)\/?$/)
     if (singlePatientMatch) {

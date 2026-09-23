@@ -7,6 +7,7 @@ import { patientsService } from '../../services/patients.service';
 import { appointmentsService } from '../../services/appointments.service';
 import { AppointmentStatus } from '../../types/appointment';
 import { toInputDate } from '../../utils/formatters';
+import { NotificationsCard } from './components/NotificationsCard';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -96,6 +97,10 @@ export function Dashboard() {
               </strong>
             </div>
           </article>
+        </div>
+
+        <div className="dashboard-notifications-section">
+          <NotificationsCard />
         </div>
       </section>
     </AppLayout>
