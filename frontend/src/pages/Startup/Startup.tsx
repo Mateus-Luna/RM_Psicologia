@@ -8,9 +8,9 @@ export function Startup() {
   useEffect(() => {
     async function checkSetup() {
       try {
-        const storedUser = sessionStorage.getItem('renato_psic_user');
+        const storedSession = sessionStorage.getItem('renato_psic_session');
 
-        if (storedUser) {
+        if (storedSession) {
           navigate('/dashboard', { replace: true });
           return;
         }

@@ -1,12 +1,16 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { randomBytes, createHash } from 'node:crypto';
 import { SetupDto } from './dto/setup.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon2 from 'argon2';
 
-
 @Injectable()
 export class AuthService {
-    constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async isConfigured(): Promise<boolean> {
     const user = await this.prisma.user.findFirst();
@@ -57,6 +61,61 @@ export class AuthService {
     if (!passwordValid) {
       throw new UnauthorizedException('Invalid password');
     }
+
+    const token = randomBytes(32).toString('hex');
+
+    const tokenHash = createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const expiresAt = new Date(
+      Date.now() + 8 * 60 * 60 * 1000,
+    );
+
+    await this.prisma.session.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        expiresAt,
+      },
+    });
+
+    return {
+      id: user.id,
+      name: user.name,
+      token,
+      expiresAt,
+    };
+  }
+
+  async unlock(userId: number, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const passwordValid = await argon2.verify(
+      user.passwordHash,
+      password,
+    );
+
+    if (!passwordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    await this.prisma.session.updateMany({
+      where: {
+        userId,
+      },
+      data: {
+        lastActivityAt: new Date(),
+      },
+    });
 
     return {
       id: user.id,

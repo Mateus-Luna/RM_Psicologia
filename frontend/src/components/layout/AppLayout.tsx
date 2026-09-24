@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
+import { AutoLock } from '../auth/AutoLock';
+
 interface AppLayoutProps {
   children: ReactNode;
   title?: string;
@@ -13,14 +15,16 @@ interface AppLayoutProps {
 export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
   const navigate = useNavigate();
 
-  const storedUser = sessionStorage.getItem('renato_psic_user');
+  const storedSession = sessionStorage.getItem('renato_psic_session');
 
-  const user = storedUser
-    ? JSON.parse(storedUser)
+  const session = storedSession
+    ? JSON.parse(storedSession)
     : null;
 
+
+
   function handleLogout() {
-    sessionStorage.removeItem('renato_psic_user');
+    sessionStorage.removeItem('renato_psic_session');
     navigate('/login', { replace: true });
   }
 
@@ -30,7 +34,7 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
 
       <div className="app-content">
         <Header
-          userName={user?.name ?? 'usuário'}
+          userName={session?.name ?? 'usuário'}
           title={title}
           subtitle={subtitle}
         />
@@ -39,6 +43,8 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
           {children}
         </main>
       </div>
+
+      <AutoLock />
     </div>
   );
 }

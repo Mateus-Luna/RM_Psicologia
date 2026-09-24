@@ -1,9 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 export function ProtectedRoute() {
-  const user = sessionStorage.getItem('renato_psic_user');
+  const session = sessionStorage.getItem('renato_psic_session');
 
-  if (!user) {
+
+  if (!session) {
     return <Navigate to="/login" replace />;
   }
 

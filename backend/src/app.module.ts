@@ -8,11 +8,16 @@ import { PatientsModule } from './patients/patients.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { NotificationsModule } from './notifications/notifications.module';
-
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [PrismaModule, UsersModule, AuthModule, PatientsModule, MedicalRecordsModule, AppointmentsModule, NotificationsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: AuthGuard,
+  },
+],
 })
 export class AppModule {}
