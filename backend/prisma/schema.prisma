@@ -18,6 +18,7 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  sessions     Session[]
 }
 
 model Patient {
@@ -122,4 +123,20 @@ enum AppointmentStatus {
   COMPLETED
   CANCELLED
   NO_SHOW
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+
+  tokenHash String   @unique
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime @default(now())
+  lastActivityAt DateTime @default(now())
+  expiresAt      DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
 }

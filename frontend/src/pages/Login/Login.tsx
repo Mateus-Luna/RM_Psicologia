@@ -22,8 +22,13 @@ export function Login() {
       });
 
       sessionStorage.setItem(
-        'renato_psic_user',
-        JSON.stringify(response.data),
+        'renato_psic_session',
+        JSON.stringify({
+          id: response.data.id,
+          name: response.data.name,
+          expiresAt: response.data.expiresAt,
+          token: response.data.token,
+        }),
       );
 
       navigate('/dashboard');
