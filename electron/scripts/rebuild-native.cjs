@@ -1,10 +1,13 @@
 /**
  * Rebuilds all native Node.js modules for Electron 44.2.0 (Windows x64 / ABI 149).
  * 
- * Specifically handles both top-level and nested native modules, such as:
- * - backend/node_modules/better-sqlite3
- * - backend/node_modules/@prisma/adapter-better-sqlite3/node_modules/better-sqlite3
- * - backend/node_modules/argon2
+ * Specifically rebuilds the 3 concrete native module instances:
+ * 1. backend/node_modules/@prisma/adapter-better-sqlite3/node_modules/better-sqlite3
+ * 2. backend/node_modules/better-sqlite3
+ * 3. backend/node_modules/argon2
+ * 
+ * Never considers @types/* packages.
+ * Never uses backend/node_modules as module-dir (only directories containing package.json).
  */
 const { execSync } = require('child_process');
 const path = require('path');
@@ -15,10 +18,8 @@ const TARGET_ARCH = 'x64';
 
 const projectRoot = path.resolve(__dirname, '..', '..');
 const backendDir = path.resolve(projectRoot, 'backend');
-const backendNodeModules = path.resolve(backendDir, 'node_modules');
 const electronDir = path.resolve(__dirname, '..');
 
-// Find electron-rebuild executable
 function getElectronRebuildBin() {
   const possiblePaths = [
     path.join(electronDir, 'node_modules', '.bin', 'electron-rebuild.cmd'),
@@ -36,71 +37,24 @@ function getElectronRebuildBin() {
   return 'npx electron-rebuild';
 }
 
-/**
- * Recursively find directories for native modules (better-sqlite3, argon2)
- */
-function findNativeModules(startDir, moduleNames) {
-  const found = [];
-
-  function scan(currentDir, depth = 0) {
-    if (depth > 8 || !fs.existsSync(currentDir)) return;
-
-    let entries;
-    try {
-      entries = fs.readdirSync(currentDir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-
-      const fullPath = path.join(currentDir, entry.name);
-
-      if (moduleNames.includes(entry.name)) {
-        const pkgJson = path.join(fullPath, 'package.json');
-        const bindingGyp = path.join(fullPath, 'binding.gyp');
-
-        if (fs.existsSync(pkgJson) || fs.existsSync(bindingGyp)) {
-          const parentDir = path.dirname(currentDir);
-          found.push({
-            name: entry.name,
-            modulePath: fullPath,
-            parentDir: parentDir,
-          });
-        }
-      }
-
-      // Descend into node_modules, scopes, or packages that might contain nested node_modules
-      if (
-        entry.name === 'node_modules' ||
-        entry.name.startsWith('@') ||
-        currentDir.endsWith('node_modules') ||
-        entry.name === 'adapter-better-sqlite3'
-      ) {
-        scan(fullPath, depth + 1);
-      }
-    }
-  }
-
-  scan(startDir);
-  return found;
-}
-
-function runRebuildForModule(rebuildBin, parentDir, moduleName) {
+function runRebuild(rebuildBin, moduleDir, whichModules) {
   console.log(`\n==================================================`);
-  console.log(`Reconstruindo [${moduleName}]`);
-  console.log(`Diretório pai: ${parentDir}`);
+  console.log(`Reconstruindo módulos: ${whichModules}`);
+  console.log(`Diretório pai (module-dir): ${moduleDir}`);
   console.log(`==================================================`);
 
+  if (!fs.existsSync(path.join(moduleDir, 'package.json'))) {
+    throw new Error(`Diretório inválido para rebuild (sem package.json): ${moduleDir}`);
+  }
+
   const platformFlag = process.platform === 'win32' ? '--platform win32' : '';
-  const cmd = `"${rebuildBin}" --version ${ELECTRON_VERSION} --arch ${TARGET_ARCH} ${platformFlag} --force --module-dir "${parentDir}" --which-module ${moduleName}`;
+  const cmd = `"${rebuildBin}" --version ${ELECTRON_VERSION} --arch ${TARGET_ARCH} ${platformFlag} --force --module-dir "${moduleDir}" --which-module ${whichModules}`;
 
   console.log(`Executando: ${cmd}\n`);
 
   execSync(cmd, {
     stdio: 'inherit',
-    cwd: parentDir,
+    cwd: moduleDir,
     env: {
       ...process.env,
       npm_config_target: ELECTRON_VERSION,
@@ -113,27 +67,16 @@ function runRebuildForModule(rebuildBin, parentDir, moduleName) {
   });
 }
 
-function verifyModuleNodeBinary(modulePath, moduleName) {
-  const possibleNodePaths = [
-    path.join(modulePath, 'build', 'Release', `${moduleName.replace('-', '_')}.node`),
-    path.join(modulePath, 'build', 'Release', `${moduleName}.node`),
-  ];
-
-  if (moduleName === 'argon2') {
-    possibleNodePaths.push(
-      path.join(modulePath, 'lib', 'binding', 'argon2.node'),
-      path.join(modulePath, 'build', 'Release', 'argon2.node')
-    );
-  }
-
-  for (const p of possibleNodePaths) {
+function verifyBinary(label, expectedPaths) {
+  for (const p of expectedPaths) {
     if (fs.existsSync(p)) {
-      console.log(`✓ Verificado: ${p}`);
+      console.log(`✓ [${label}] Binário validado: ${p}`);
       return true;
     }
   }
 
-  console.warn(`! Atenção: Binário .node não encontrado nos caminhos padrão para ${modulePath}`);
+  console.error(`✗ [${label}] Binário .node não encontrado em nenhum dos caminhos esperados:`);
+  expectedPaths.forEach(p => console.error(`    - ${p}`));
   return false;
 }
 
@@ -145,55 +88,98 @@ function main() {
   const rebuildBin = getElectronRebuildBin();
   console.log(`Ferramenta: ${rebuildBin}`);
 
-  if (!fs.existsSync(backendNodeModules)) {
-    console.error(`Erro: Diretório não encontrado: ${backendNodeModules}`);
-    process.exit(1);
-  }
+  // Define concrete paths
+  const nestedPrismaAdapterDir = path.resolve(
+    backendDir,
+    'node_modules',
+    '@prisma',
+    'adapter-better-sqlite3'
+  );
+  const nestedBetterSqlite3Dir = path.resolve(
+    nestedPrismaAdapterDir,
+    'node_modules',
+    'better-sqlite3'
+  );
 
-  const nativeModules = findNativeModules(backendNodeModules, ['better-sqlite3', 'argon2']);
+  const rootBetterSqlite3Dir = path.resolve(backendDir, 'node_modules', 'better-sqlite3');
+  const rootArgon2Dir = path.resolve(backendDir, 'node_modules', 'argon2');
 
-  console.log(`\nEncontradas ${nativeModules.length} instâncias de módulos nativos no backend:`);
-  nativeModules.forEach((m, idx) => {
-    console.log(`  ${idx + 1}. [${m.name}] em: ${m.modulePath}`);
-  });
+  let hasErrors = false;
 
-  if (nativeModules.length === 0) {
-    console.warn('Aviso: Nenhuma instância de better-sqlite3 ou argon2 foi encontrada para rebuild.');
-    return;
-  }
-
-  // Deduplicate by parentDir + moduleName
-  const tasks = [];
-  const seen = new Set();
-
-  for (const m of nativeModules) {
-    const key = `${m.parentDir}::${m.name}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      tasks.push(m);
-    }
-  }
-
-  let errorCount = 0;
-
-  for (const task of tasks) {
+  // 1. Rebuild nested better-sqlite3 in @prisma/adapter-better-sqlite3
+  if (fs.existsSync(nestedBetterSqlite3Dir)) {
     try {
-      runRebuildForModule(rebuildBin, task.parentDir, task.name);
-      verifyModuleNodeBinary(task.modulePath, task.name);
+      runRebuild(rebuildBin, nestedPrismaAdapterDir, 'better-sqlite3');
     } catch (err) {
-      console.error(`\n✗ Falha ao reconstruir ${task.name} em ${task.parentDir}:`, err.message);
-      errorCount++;
+      console.error(`✗ Falha no rebuild de better-sqlite3 aninhado:`, err.message);
+      hasErrors = true;
+    }
+  } else {
+    console.log(`[Info] better-sqlite3 aninhado em @prisma/adapter-better-sqlite3 não encontrado (pulando).`);
+  }
+
+  // 2. Rebuild root native modules in backend (better-sqlite3 and argon2 together)
+  const rootModulesToRebuild = [];
+  if (fs.existsSync(rootBetterSqlite3Dir)) {
+    rootModulesToRebuild.push('better-sqlite3');
+  }
+  if (fs.existsSync(rootArgon2Dir)) {
+    rootModulesToRebuild.push('argon2');
+  }
+
+  if (rootModulesToRebuild.length > 0) {
+    try {
+      runRebuild(rebuildBin, backendDir, rootModulesToRebuild.join(','));
+    } catch (err) {
+      console.error(`✗ Falha no rebuild dos módulos raiz (${rootModulesToRebuild.join(',')}):`, err.message);
+      hasErrors = true;
     }
   }
 
+  // 3. Validation of the 3 concrete instances
   console.log('\n==================================================');
-  if (errorCount === 0) {
-    console.log(`✓ Rebuild de todas as instâncias de módulos nativos finalizado com sucesso!`);
-  } else {
-    console.error(`✗ Rebuild finalizado com ${errorCount} erro(s).`);
+  console.log('Validando binários .node gerados');
+  console.log('==================================================');
+
+  let validationOk = true;
+
+  // Validate nested better-sqlite3
+  if (fs.existsSync(nestedBetterSqlite3Dir)) {
+    const nestedOk = verifyBinary('better-sqlite3 (Prisma aninhado)', [
+      path.join(nestedBetterSqlite3Dir, 'build', 'Release', 'better_sqlite3.node'),
+      path.join(nestedBetterSqlite3Dir, 'Release', 'better_sqlite3.node'),
+    ]);
+    if (!nestedOk) validationOk = false;
+  }
+
+  // Validate root better-sqlite3
+  if (fs.existsSync(rootBetterSqlite3Dir)) {
+    const rootSqliteOk = verifyBinary('better-sqlite3 (raiz backend)', [
+      path.join(rootBetterSqlite3Dir, 'build', 'Release', 'better_sqlite3.node'),
+      path.join(rootBetterSqlite3Dir, 'Release', 'better_sqlite3.node'),
+    ]);
+    if (!rootSqliteOk) validationOk = false;
+  }
+
+  // Validate root argon2
+  if (fs.existsSync(rootArgon2Dir)) {
+    const argonOk = verifyBinary('argon2 (raiz backend)', [
+      path.join(rootArgon2Dir, 'build', 'Release', 'argon2.node'),
+      path.join(rootArgon2Dir, 'lib', 'binding', 'argon2.node'),
+      path.join(rootArgon2Dir, 'lib', 'binding', 'napi-v3', 'argon2.node'),
+      path.join(rootArgon2Dir, 'Release', 'argon2.node'),
+    ]);
+    if (!argonOk) validationOk = false;
+  }
+
+  console.log('==================================================\n');
+
+  if (hasErrors || !validationOk) {
+    console.error('✗ Rebuild finalizado com erros de compilação ou validação.');
     process.exit(1);
   }
-  console.log('==================================================\n');
+
+  console.log('✓ Rebuild finalizado sem erros! Todos os módulos nativos reais foram reconstruídos e validados.');
 }
 
 main();
