@@ -1,5 +1,5 @@
 import {
-  BrowserRouter,
+  HashRouter,
   Navigate,
   Route,
   Routes,
@@ -19,7 +19,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 
 export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Startup />} />
 
@@ -48,6 +48,6 @@ export function AppRoutes() {
           element={<Navigate to="/" replace />}
         />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

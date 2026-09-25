@@ -5,12 +5,21 @@ import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3001',
-    'http://192.168.0.7:3001',
-  ],
-});
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        origin === 'null' ||
+        origin.startsWith('file://') ||
+        origin.startsWith('http://localhost') ||
+        origin.startsWith('http://127.0.0.1')
+      ) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Bloqueado por CORS'), false);
+    },
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

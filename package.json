@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm --prefix backend run build",
+    "dist:win": "npm --prefix electron run dist:win",
     "lint": "npm run lint --workspace=frontend",
     "start": "npm run preview --workspace=frontend"
   },

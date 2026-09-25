@@ -821,6 +821,7 @@ function apiMockPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [react(), apiMockPlugin()],
   server: {
     host: '0.0.0.0',
