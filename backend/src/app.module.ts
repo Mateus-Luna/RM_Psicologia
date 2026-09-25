@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -10,9 +11,18 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { CryptoModule } from './crypto/crypto.module';
+import { BackupModule } from './backup/backup.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, PatientsModule, MedicalRecordsModule, AppointmentsModule, NotificationsModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    CryptoModule,
+    BackupModule,
+    PrismaModule, UsersModule, AuthModule, PatientsModule,
+    MedicalRecordsModule, AppointmentsModule, NotificationsModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,

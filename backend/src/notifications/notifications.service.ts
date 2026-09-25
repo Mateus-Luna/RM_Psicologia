@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { CryptoService } from '../crypto/crypto.service';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cryptoService: CryptoService,
+  ) {}
 
   async getTodayBirthdays() {
     const today = new Date();
 
-    const currentMonth = today.getUTCMonth();
-    const currentDay = today.getUTCDate();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
 
     const patients = await this.prisma.patient.findMany({
       where: {
@@ -20,9 +24,6 @@ export class NotificationsService {
         id: true,
         name: true,
         birthDate: true,
-      },
-      orderBy: {
-        name: 'asc',
       },
     });
 
@@ -37,8 +38,11 @@ export class NotificationsService {
       })
       .map((patient) => ({
         id: patient.id,
-        name: patient.name,
+        name: this.cryptoService.decrypt(patient.name),
         birthDate: patient.birthDate,
-      }));
+      }))
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, 'pt-BR'),
+      );
   }
 }
