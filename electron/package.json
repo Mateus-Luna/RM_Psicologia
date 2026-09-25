@@ -7,10 +7,10 @@
     "start": "electron .",
     "start:prod": "cross-env NODE_ENV=production electron .",
     "start:dev": "cross-env NODE_ENV=development electron .",
-    "rebuild": "electron-rebuild -f -w better-sqlite3,argon2",
-    "dist": "electron-builder --win --x64 --config electron-builder.json",
-    "dist:win": "electron-builder --win --x64 --config electron-builder.json",
-    "pack:win": "electron-builder --win --x64 --dir --config electron-builder.json"
+    "rebuild": "node scripts/rebuild-native.cjs",
+    "dist": "npm run rebuild && electron-builder --win --x64 --config electron-builder.json",
+    "dist:win": "npm run rebuild && electron-builder --win --x64 --config electron-builder.json",
+    "pack:win": "npm run rebuild && electron-builder --win --x64 --dir --config electron-builder.json"
   },
   "keywords": [],
   "author": "",

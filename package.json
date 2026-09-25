@@ -11,6 +11,8 @@
     "build": "npm run build --workspace=frontend",
     "build:frontend": "npm run build --workspace=frontend",
     "build:backend": "npm --prefix backend run build",
+    "build:all": "npm run build:frontend && npm run build:backend",
+    "rebuild:native": "npm --prefix electron run rebuild",
     "dist:win": "npm --prefix electron run dist:win",
     "lint": "npm run lint --workspace=frontend",
     "start": "npm run preview --workspace=frontend"
