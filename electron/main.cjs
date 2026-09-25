@@ -177,6 +177,39 @@ function waitForBackend() {
   });
 }
 
+function getFrontendIndexPath() {
+  const possibleIndexPaths = [
+    // 1. Packaged inside app.asar (with explicit 'frontend/dist' mapping)
+    path.join(app.getAppPath(), 'frontend', 'dist', 'index.html'),
+    // 2. Packaged relative to __dirname inside app.asar
+    path.join(__dirname, 'frontend', 'dist', 'index.html'),
+    // 3. Fallbacks inside app.asar if flattened
+    path.join(app.getAppPath(), 'dist', 'index.html'),
+    path.join(app.getAppPath(), 'index.html'),
+    // 4. In resources directory (if unpacked)
+    path.join(process.resourcesPath, 'frontend', 'dist', 'index.html'),
+    path.join(process.resourcesPath, 'app', 'frontend', 'dist', 'index.html'),
+    // 5. In development (monorepo root: electron/../frontend/dist/index.html)
+    path.join(__dirname, '..', 'frontend', 'dist', 'index.html'),
+    path.join(process.cwd(), 'frontend', 'dist', 'index.html'),
+  ];
+
+  for (const candidate of possibleIndexPaths) {
+    try {
+      if (fs.existsSync(candidate)) {
+        console.log(`[Frontend] index.html localizado em: ${candidate}`);
+        return candidate;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  console.error('[Frontend] ERRO: index.html não foi localizado nos caminhos verificados:');
+  possibleIndexPaths.forEach((p) => console.error(`  - ${p}`));
+  return path.join(app.getAppPath(), 'frontend', 'dist', 'index.html');
+}
+
 function createWindow() {
   const iconPath = path.join(__dirname, 'assets', 'icon.png');
 
@@ -193,19 +226,10 @@ function createWindow() {
     },
   });
 
-  if (isDev) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173');
+  if (isDev && process.env.VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    // When packaged, index.html might be in app.asar or unpacked
-    const possibleIndexPaths = [
-      path.join(app.getAppPath(), 'frontend', 'dist', 'index.html'),
-      path.join(__dirname, '..', 'frontend', 'dist', 'index.html'),
-    ];
-
-    const indexPath =
-      possibleIndexPaths.find((p) => fs.existsSync(p)) ||
-      path.join(__dirname, '..', 'frontend', 'dist', 'index.html');
-
+    const indexPath = getFrontendIndexPath();
     mainWindow.loadFile(indexPath);
   }
 
