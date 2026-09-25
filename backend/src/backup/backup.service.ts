@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { isAbsolute, resolve } from 'node:path';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -22,9 +22,11 @@ export class BackupService {
       );
     }
 
-    const databasePath = databaseUrl.replace(/^file:/, '');
+    const databasePath = databaseUrl.replace(/^file:/, '').split('?')[0];
 
-    return resolve(process.cwd(), databasePath);
+    return isAbsolute(databasePath)
+      ? databasePath
+      : resolve(process.cwd(), databasePath);
   }
 
   async createBackup(): Promise<{

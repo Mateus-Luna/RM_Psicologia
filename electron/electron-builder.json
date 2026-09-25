@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.rmpsicologia.app",
+  "productName": "RM Psicologia",
+  "artifactName": "${productName}-Setup-${version}.${ext}",
+  "directories": {
+    "output": "../release",
+    "buildResources": "assets"
+  },
+  "files": [
+    "main.cjs",
+    "assets/**/*",
+    "../frontend/dist/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "../backend/dist",
+      "to": "backend/dist",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../backend/prisma/migrations",
+      "to": "backend/prisma/migrations",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../backend/generated/prisma",
+      "to": "backend/generated/prisma",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../backend/node_modules",
+      "to": "backend/node_modules",
+      "filter": [
+        "**/*",
+        "!**/*.md",
+        "!**/*.ts",
+        "!**/test/**",
+        "!**/tests/**"
+      ]
+    }
+  ],
+  "asar": true,
+  "asarUnpack": [
+    "**/node_modules/better-sqlite3/**",
+    "**/node_modules/argon2/**"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "assets/icon.ico",
+    "executableName": "RM Psicologia"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "RM Psicologia",
+    "uninstallDisplayName": "RM Psicologia ${version}",
+    "deleteAppDataOnUninstall": false
+  }
+}

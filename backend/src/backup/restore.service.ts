@@ -4,9 +4,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { existsSync } from 'node:fs';
-import { copyFile, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
-import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import Database from 'better-sqlite3';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,9 +31,11 @@ export class RestoreService {
       );
     }
 
-    const databasePath = databaseUrl.replace(/^file:/, '');
+    const databasePath = databaseUrl.replace(/^file:/, '').split('?')[0];
 
-    return resolve(process.cwd(), databasePath);
+    return isAbsolute(databasePath)
+      ? databasePath
+      : resolve(process.cwd(), databasePath);
   }
 
   private validateSQLiteDatabase(buffer: Buffer): void {
@@ -125,7 +128,7 @@ export class RestoreService {
     this.validateSQLiteDatabase(buffer);
 
     const temporaryDirectory = await mkdtemp(
-      join(process.cwd(), 'restore-temp-'),
+      join(tmpdir(), 'rm-psic-restore-'),
     );
 
     const temporaryDatabasePath = join(
@@ -173,25 +176,21 @@ export class RestoreService {
       const safetyBackupFilename =
         `RM-Psicologia-Pre-Restore-${date}-${time}-${randomBytes(4).toString('hex')}.db`;
 
+      const backupsDirectory =
+        process.env.BACKUPS_DIR ||
+        resolve(dirname(databasePath), '..', 'backups');
+
       const safetyBackupPath = resolve(
-        process.cwd(),
-        'backup-test',
+        backupsDirectory,
         safetyBackupFilename,
       );
 
       /*
        * O diretório precisa existir antes da cópia.
        */
-      const safetyBackupDirectory = resolve(
-        process.cwd(),
-        'backup-test',
-      );
-
-      await import('node:fs/promises').then(({ mkdir }) =>
-        mkdir(safetyBackupDirectory, {
-          recursive: true,
-        }),
-      );
+      await mkdir(backupsDirectory, {
+        recursive: true,
+      });
 
       await copyFile(
         databasePath,
