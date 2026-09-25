@@ -10,7 +10,11 @@
   "files": [
     "main.cjs",
     "assets/**/*",
-    "../frontend/dist/**/*"
+    {
+      "from": "../frontend/dist",
+      "to": "frontend/dist",
+      "filter": ["**/*"]
+    }
   ],
   "extraResources": [
     {
