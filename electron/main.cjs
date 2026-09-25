@@ -8,6 +8,13 @@ const crypto = require('crypto');
 let backendProcess = null;
 let mainWindow = null;
 
+// Define um diretório próprio para os dados persistentes da aplicação.
+// Deve ser configurado antes de qualquer uso de app.getPath('userData').
+app.setPath(
+  'userData',
+  path.join(app.getPath('appData'), 'RM_Psicologia'),
+);
+
 // Determine environment: development vs production
 const isDev = process.env.NODE_ENV === 'development';
 
