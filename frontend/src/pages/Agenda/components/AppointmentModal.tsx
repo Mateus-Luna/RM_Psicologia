@@ -313,7 +313,14 @@ function AppointmentModalContent({
         <form
           onSubmit={handleSubmit}
           id="appointment-form"
-          style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '18px',
+            maxHeight: 'calc(90vh - 90px)',
+            overflowY: 'auto',
+            paddingRight: '4px',
+          }}
         >
           {/* PACIENTE */}
           <div className="form-group">

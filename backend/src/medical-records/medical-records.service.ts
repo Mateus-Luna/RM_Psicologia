@@ -4,6 +4,7 @@ import {
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { CryptoService } from '../crypto/crypto.service';
 import { Prisma } from '../../generated/prisma/client';
 
 import { CreateMedicalRecordEntryDto } from './dto/create-medical-record-entry.dto';
@@ -12,7 +13,20 @@ import { FindMedicalRecordEntriesDto } from './dto/find-medical-record-entries.d
 
 @Injectable()
 export class MedicalRecordsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cryptoService: CryptoService,
+  ) {}
+
+  private decryptEntry(entry: any) {
+    return {
+      ...entry,
+
+      content: entry.content
+        ? this.cryptoService.decrypt(entry.content)
+        : entry.content,
+    };
+  }
 
   async create(
     patientId: number,
@@ -29,14 +43,20 @@ export class MedicalRecordsService {
       throw new NotFoundException('Paciente não encontrado.');
     }
 
-    return this.prisma.medicalRecordEntry.create({
-      data: {
-        patientId,
-        type: createDto.type,
-        entryDate: new Date(createDto.entryDate),
-        content: createDto.content,
-      },
-    });
+    const entry =
+      await this.prisma.medicalRecordEntry.create({
+        data: {
+          patientId,
+          type: createDto.type,
+          entryDate: new Date(createDto.entryDate),
+
+          content: this.cryptoService.encrypt(
+            createDto.content,
+          ),
+        },
+      });
+
+    return this.decryptEntry(entry);
   }
 
   async findAll(
@@ -51,18 +71,14 @@ export class MedicalRecordsService {
     });
 
     if (!patient) {
-      throw new NotFoundException('Paciente não encontrado.');
+      throw new NotFoundException(
+        'Paciente não encontrado.',
+      );
     }
 
     const where: Prisma.MedicalRecordEntryWhereInput = {
       patientId,
     };
-
-    if (filters.search) {
-      where.content = {
-        contains: filters.search,
-      };
-    }
 
     if (filters.type) {
       where.type = filters.type;
@@ -73,32 +89,52 @@ export class MedicalRecordsService {
         ...(filters.startDate && {
           gte: new Date(filters.startDate),
         }),
+
         ...(filters.endDate && {
           lte: new Date(filters.endDate),
         }),
       };
     }
 
-    return this.prisma.medicalRecordEntry.findMany({
-      where,
-      orderBy: [
-        {
-          entryDate: 'desc',
-        },
-        {
-          createdAt: 'desc',
-        },
-      ],
-    });
+    const entries =
+      await this.prisma.medicalRecordEntry.findMany({
+        where,
+        orderBy: [
+          {
+            entryDate: 'desc',
+          },
+          {
+            createdAt: 'desc',
+          },
+        ],
+      });
+
+    let decryptedEntries = entries.map((entry) =>
+      this.decryptEntry(entry),
+    );
+
+    if (filters.search) {
+      const search = filters.search.toLowerCase();
+
+      decryptedEntries = decryptedEntries.filter(
+        (entry) =>
+          entry.content
+            ?.toLowerCase()
+            .includes(search),
+      );
+    }
+
+    return decryptedEntries;
   }
 
   async findOne(patientId: number, id: number) {
-    const entry = await this.prisma.medicalRecordEntry.findFirst({
-      where: {
-        id,
-        patientId,
-      },
-    });
+    const entry =
+      await this.prisma.medicalRecordEntry.findFirst({
+        where: {
+          id,
+          patientId,
+        },
+      });
 
     if (!entry) {
       throw new NotFoundException(
@@ -106,7 +142,7 @@ export class MedicalRecordsService {
       );
     }
 
-    return entry;
+    return this.decryptEntry(entry);
   }
 
   async update(
@@ -116,22 +152,29 @@ export class MedicalRecordsService {
   ) {
     await this.findOne(patientId, id);
 
-    return this.prisma.medicalRecordEntry.update({
-      where: {
-        id,
-      },
-      data: {
-        ...(updateDto.type !== undefined && {
-          type: updateDto.type,
-        }),
-        ...(updateDto.entryDate !== undefined && {
-          entryDate: new Date(updateDto.entryDate),
-        }),
-        ...(updateDto.content !== undefined && {
-          content: updateDto.content,
-        }),
-      },
-    });
+    const entry =
+      await this.prisma.medicalRecordEntry.update({
+        where: {
+          id,
+        },
+        data: {
+          ...(updateDto.type !== undefined && {
+            type: updateDto.type,
+          }),
+
+          ...(updateDto.entryDate !== undefined && {
+            entryDate: new Date(updateDto.entryDate),
+          }),
+
+          ...(updateDto.content !== undefined && {
+            content: this.cryptoService.encrypt(
+              updateDto.content,
+            ),
+          }),
+        },
+      });
+
+    return this.decryptEntry(entry);
   }
 
   async remove(patientId: number, id: number) {

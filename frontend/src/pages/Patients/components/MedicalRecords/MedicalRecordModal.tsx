@@ -88,6 +88,11 @@ export function MedicalRecordModal({
         className="modal-content modal-content-lg"
         id="medical-record-modal"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
         {/* HEADER */}
         <div className="modal-header">
@@ -124,7 +129,16 @@ export function MedicalRecordModal({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="medical-record-form">
+        <form
+          onSubmit={handleSubmit}
+          className="medical-record-form"
+          style={{
+            overflowY: 'auto',
+            flex: 1,
+            minHeight: 0,
+            paddingRight: '6px',
+          }}
+        >
           {/* TIPO DE REGISTRO */}
           <div className="form-field">
             <label>Tipo de Registro</label>

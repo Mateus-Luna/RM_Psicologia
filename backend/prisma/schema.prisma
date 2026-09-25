@@ -25,7 +25,9 @@ model Patient {
   id Int @id @default(autoincrement())
 
   name String
-  cpf String? @unique
+  cpf String? 
+  cpfHash String? @unique
+
   phone String
 
   birthDate DateTime
@@ -66,7 +68,6 @@ model PatientMedication {
   updatedAt DateTime @updatedAt
 
   @@index([patientId])
-  @@index([name])
 }
 
 model MedicalRecordEntry {
