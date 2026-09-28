@@ -9,3 +9,4 @@ out/
 *.log
 .DS_Store
 frontend/.auth_db.json
+release/
