@@ -12,6 +12,7 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 import { FindPatientsDto } from './dto/find-patients.dto';
 
 import { Prisma } from '../../generated/prisma/client';
+import { AppointmentStatus } from '../../generated/prisma/enums';
 
 @Injectable()
 export class PatientsService {
@@ -594,16 +595,32 @@ return this.decryptPatient(activatedPatient);
 async remove(id: number) {
 await this.findOne(id);
 
+return this.prisma.$transaction(async (tx) => {
+  const now = new Date();
 
-return this.prisma.patient.update({
-  where: {
-    id,
-  },
-  data: {
-    isActive: false,
-  },
+  await tx.appointment.updateMany({
+    where: {
+      patientId: id,
+      status: AppointmentStatus.SCHEDULED,
+      startAt: {
+        gte: now,
+      },
+    },
+    data: {
+      status: AppointmentStatus.CANCELLED,
+    },
+  });
+
+  const updatedPatient = await tx.patient.update({
+    where: {
+      id,
+    },
+    data: {
+      isActive: false,
+    },
+  });
+
+  return this.decryptPatient(updatedPatient);
 });
-
-
 }
 }

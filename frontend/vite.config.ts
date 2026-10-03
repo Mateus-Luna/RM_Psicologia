@@ -471,6 +471,26 @@ function apiMockPlugin(): Plugin {
         list[idx].isActive = false
         list[idx].updatedAt = new Date().toISOString()
         savePatients(list)
+
+        // Automatically cancel future scheduled appointments of the patient
+        const now = new Date().toISOString()
+        const appointments = getAppointments()
+        let hasChanges = false
+        for (const app of appointments) {
+          if (
+            app.patientId === targetId &&
+            app.status === 'SCHEDULED' &&
+            app.startAt >= now
+          ) {
+            app.status = 'CANCELLED'
+            app.updatedAt = new Date().toISOString()
+            hasChanges = true
+          }
+        }
+        if (hasChanges) {
+          saveAppointments(appointments)
+        }
+
         return sendJson(res, 200, list[idx])
       }
 

@@ -17,6 +17,10 @@ const prisma = {
     findUnique: jest.fn<(args: unknown) => Promise<unknown>>(),
     update: jest.fn<(args: unknown) => Promise<unknown>>(),
   },
+  appointment: {
+    updateMany: jest.fn<(args: unknown) => Promise<unknown>>(),
+  },
+  $transaction: jest.fn(async (cb: (tx: any) => Promise<any>) => cb(prisma)),
 };
 
 const cryptoService = {
@@ -33,6 +37,8 @@ beforeEach(() => {
   prisma.patient.findFirst.mockReset();
   prisma.patient.findUnique.mockReset();
   prisma.patient.update.mockReset();
+  prisma.appointment.updateMany.mockReset();
+  prisma.$transaction.mockImplementation(async (cb: any) => cb(prisma));
 
   cryptoService.decrypt.mockClear();
 });
@@ -417,5 +423,81 @@ describe('activate', () => {
     expect(result.isActive).toBe(true);
     expect(result.medications).toHaveLength(1);
     expect(result.medications[0].isActive).toBe(true);
+  });
+});
+
+describe('remove', () => {
+  it('deve inativar o paciente e cancelar automaticamente agendamentos futuros com status SCHEDULED', async () => {
+    const existingPatient = {
+      id: 1,
+      name: 'João da Silva',
+      cpf: '12345678900',
+      phone: '83999999999',
+      diagnosticHypothesis: null,
+      doctorName: null,
+      generalNotes: null,
+      isActive: true,
+      medications: [],
+    };
+
+    const inactivatedPatient = {
+      ...existingPatient,
+      isActive: false,
+    };
+
+    prisma.patient.findFirst.mockResolvedValue(existingPatient);
+    prisma.appointment.updateMany.mockResolvedValue({ count: 2 });
+    prisma.patient.update.mockResolvedValue(inactivatedPatient);
+
+    const result = await service.remove(1);
+
+    expect(prisma.patient.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 1,
+        isActive: true,
+      },
+      include: {
+        medications: {
+          where: {
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    expect(prisma.appointment.updateMany).toHaveBeenCalledWith({
+      where: {
+        patientId: 1,
+        status: 'SCHEDULED',
+        startAt: {
+          gte: expect.any(Date),
+        },
+      },
+      data: {
+        status: 'CANCELLED',
+      },
+    });
+
+    expect(prisma.patient.update).toHaveBeenCalledWith({
+      where: {
+        id: 1,
+      },
+      data: {
+        isActive: false,
+      },
+    });
+
+    expect(result.isActive).toBe(false);
+  });
+
+  it('deve lançar NotFoundException quando o paciente a ser inativado não for encontrado', async () => {
+    prisma.patient.findFirst.mockResolvedValue(null);
+
+    await expect(service.remove(999)).rejects.toThrow(
+      new NotFoundException('Paciente não encontrado.'),
+    );
+
+    expect(prisma.appointment.updateMany).not.toHaveBeenCalled();
+    expect(prisma.patient.update).not.toHaveBeenCalled();
   });
 });
