@@ -381,18 +381,51 @@ export function MedicalRecordSection({
             )}
           </div>
 
-          {/* NEW RECORD BUTTON */}
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={handleOpenCreate}
-            id="new-medical-record-btn"
-          >
-            <Plus size={16} />
-            <span>Novo registro</span>
-          </button>
+          {/* NEW RECORD BUTTON ONLY FOR ACTIVE PATIENTS */}
+          {patient.isActive !== false ? (
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={handleOpenCreate}
+              id="new-medical-record-btn"
+            >
+              <Plus size={16} />
+              <span>Novo registro</span>
+            </button>
+          ) : (
+            <span
+              className="badge badge-danger"
+              style={{ fontWeight: 700, padding: '4px 10px', fontSize: '11px' }}
+              title="Paciente inativo. Reative o paciente para adicionar novas evoluções."
+            >
+              INATIVO
+            </span>
+          )}
         </div>
       </div>
+
+      {/* INACTIVE PATIENT NOTICE */}
+      {patient.isActive === false && (
+        <div
+          className="alert alert-warning"
+          id="inactive-medical-records-notice"
+          style={{
+            background: '#fefce8',
+            borderColor: '#fef08a',
+            color: '#854d0e',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '13px',
+            padding: '10px 14px',
+          }}
+        >
+          <AlertCircle size={16} style={{ flexShrink: 0 }} />
+          <span>
+            <strong>Consulta histórica:</strong> Este paciente está inativo. Os registros e evoluções anteriores estão preservados para consulta e impressão. Para inserir novos registros, reative o paciente.
+          </span>
+        </div>
+      )}
 
       {/* FEEDBACK ALERTS */}
       {successMessage && (

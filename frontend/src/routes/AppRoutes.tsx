@@ -10,6 +10,7 @@ import { Setup } from '../pages/Setup/Setup';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Startup } from '../pages/Startup/Startup';
 import { PatientsPage } from '../pages/Patients/PatientsPage';
+import { InactivePatientsPage } from '../pages/Patients/InactivePatientsPage';
 import { PatientFormPage } from '../pages/Patients/PatientFormPage';
 import { PatientDetailsPage } from '../pages/Patients/PatientDetailsPage';
 import { RecordsSelectPatientPage } from '../pages/Records/RecordsSelectPatientPage';
@@ -30,6 +31,7 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/patients" element={<PatientsPage />} />
+          <Route path="/patients/inactive" element={<InactivePatientsPage />} />
           <Route path="/patients/new" element={<PatientFormPage />} />
           <Route path="/patients/:id" element={<PatientDetailsPage />} />
           <Route

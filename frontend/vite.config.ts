@@ -418,13 +418,44 @@ function apiMockPlugin(): Plugin {
 
 
     // 3. PATIENTS ROUTES
+    const activatePatientMatch = pathname.match(/^\/patients\/(\d+)\/activate\/?$/)
+    if (activatePatientMatch && method === 'PATCH') {
+      const targetId = Number(activatePatientMatch[1])
+      const list = getPatients()
+      const idx = list.findIndex((p) => p.id === targetId)
+      if (idx === -1) {
+        return sendJson(res, 404, { message: 'Paciente não encontrado.' })
+      }
+      list[idx].isActive = true
+      list[idx].updatedAt = new Date().toISOString()
+      savePatients(list)
+      return sendJson(res, 200, list[idx])
+    }
+
+    if (pathname === '/patients/inactive' || pathname === '/patients/inactive/') {
+      if (method === 'GET') {
+        const list = getPatients().filter((p) => p.isActive === false)
+        const search = parsedUrl.searchParams.get('search')?.toLowerCase()
+        let filtered = list
+        if (search) {
+          filtered = filtered.filter(
+            (p) =>
+              p.name.toLowerCase().includes(search) ||
+              (p.cpf && p.cpf.toLowerCase().includes(search)),
+          )
+        }
+        filtered.sort((a, b) => a.name.localeCompare(b.name))
+        return sendJson(res, 200, filtered)
+      }
+    }
+
     const singlePatientMatch = pathname.match(/^\/patients\/(\d+)\/?$/)
     if (singlePatientMatch) {
       const targetId = Number(singlePatientMatch[1])
 
       if (method === 'GET') {
         const list = getPatients()
-        const found = list.find((p) => p.id === targetId && p.isActive !== false)
+        const found = list.find((p) => p.id === targetId)
         if (!found) {
           return sendJson(res, 404, { message: 'Paciente não encontrado.' })
         }

@@ -155,7 +155,19 @@ function AppointmentModalContent({
       try {
         const data = await patientsService.getPatients();
         if (isMounted) {
-          setPatients(Array.isArray(data) ? data : []);
+          const activeOnly = Array.isArray(data)
+            ? data.filter((p) => p.isActive !== false)
+            : [];
+          if (
+            appointmentToEdit?.patient &&
+            !activeOnly.some((p) => p.id === appointmentToEdit.patientId)
+          ) {
+            activeOnly.unshift({
+              ...appointmentToEdit.patient,
+              name: `${appointmentToEdit.patient.name} [Inativo]`,
+            } as Patient);
+          }
+          setPatients(activeOnly);
         }
       } catch {
         // Ignore error
@@ -168,7 +180,7 @@ function AppointmentModalContent({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [appointmentToEdit]);
 
   function handleStartTimeChange(newStart: string) {
     setStartTime(newStart);

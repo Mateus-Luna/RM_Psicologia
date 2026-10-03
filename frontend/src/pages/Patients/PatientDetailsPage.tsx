@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
+  AlertTriangle,
   ArrowLeft,
   Calendar,
   ClipboardList,
@@ -9,8 +10,9 @@ import {
   Phone,
   Pill,
   Stethoscope,
-  Trash2,
   User,
+  UserCheck,
+  UserX,
 } from 'lucide-react';
 import axios from 'axios';
 import { AppLayout } from '../../components/layout/AppLayout';
@@ -18,6 +20,7 @@ import { patientsService } from '../../services/patients.service';
 import type { Patient } from '../../types/patient';
 import { formatCPF, formatDate, formatPhone } from '../../utils/formatters';
 import { InactivatePatientModal } from './components/InactivatePatientModal';
+import { ActivatePatientModal } from './components/ActivatePatientModal';
 import { MedicalRecordSection } from './components/MedicalRecords/MedicalRecordSection';
 
 interface PatientDetailsPageProps {
@@ -29,7 +32,6 @@ export function PatientDetailsPage({
 }: PatientDetailsPageProps) {
   const { id } = useParams<{ id: string }>();
   const patientId = id ? Number(id) : null;
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const queryTab = searchParams.get('tab');
@@ -43,8 +45,13 @@ export function PatientDetailsPage({
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Inactivation & Activation states
   const [inactivating, setInactivating] = useState(false);
   const [isInactivateModalOpen, setIsInactivateModalOpen] = useState(false);
+  const [activating, setActivating] = useState(false);
+  const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
 
   function handleTabChange(tab: 'prontuario' | 'cadastral') {
     setSearchParams({ tab });
@@ -79,9 +86,14 @@ export function PatientDetailsPage({
 
     setInactivating(true);
     try {
-      await patientsService.deletePatient(patient.id);
+      await patientsService.inactivatePatient(patient.id);
       setIsInactivateModalOpen(false);
-      navigate('/patients');
+      setPatient((prev) => (prev ? { ...prev, isActive: false } : null));
+      setSuccessMessage('Paciente inativado com sucesso.');
+
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 4000);
     } catch (err: unknown) {
       const msg =
         axios.isAxiosError(err) && err.response?.data?.message
@@ -90,6 +102,30 @@ export function PatientDetailsPage({
       setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setInactivating(false);
+    }
+  }
+
+  async function handleConfirmActivate() {
+    if (!patient) return;
+
+    setActivating(true);
+    try {
+      await patientsService.activatePatient(patient.id);
+      setIsActivateModalOpen(false);
+      setPatient((prev) => (prev ? { ...prev, isActive: true } : null));
+      setSuccessMessage('Paciente reativado com sucesso.');
+
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 4000);
+    } catch (err: unknown) {
+      const msg =
+        axios.isAxiosError(err) && err.response?.data?.message
+          ? err.response.data.message
+          : 'Não foi possível reativar o paciente.';
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
+    } finally {
+      setActivating(false);
     }
   }
 
@@ -158,7 +194,7 @@ export function PatientDetailsPage({
         <div className="page-header-row">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Link
-              to="/patients"
+              to={patient.isActive ? '/patients' : '/patients/inactive'}
               className="btn btn-secondary btn-sm"
               id="back-to-patients-btn"
             >
@@ -167,31 +203,83 @@ export function PatientDetailsPage({
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h2>{patient.name}</h2>
-              <span className="badge badge-success">Ativo</span>
+              {patient.isActive ? (
+                <span className="badge badge-success">Ativo</span>
+              ) : (
+                <span
+                  className="badge badge-danger"
+                  style={{ fontWeight: 700, letterSpacing: '0.5px', padding: '4px 10px' }}
+                >
+                  INATIVO
+                </span>
+              )}
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Link
-              to={`/patients/${patient.id}/edit`}
-              className="btn btn-secondary btn-sm"
-              id="edit-patient-btn"
-            >
-              <Pencil size={15} />
-              <span>Editar paciente</span>
-            </Link>
+            {patient.isActive && (
+              <Link
+                to={`/patients/${patient.id}/edit`}
+                className="btn btn-secondary btn-sm"
+                id="edit-patient-btn"
+              >
+                <Pencil size={15} />
+                <span>Editar paciente</span>
+              </Link>
+            )}
 
-            <button
-              type="button"
-              className="btn btn-danger-outline btn-sm"
-              id="inactivate-patient-btn"
-              onClick={() => setIsInactivateModalOpen(true)}
-            >
-              <Trash2 size={15} />
-              <span>Inativar</span>
-            </button>
+            {patient.isActive ? (
+              <button
+                type="button"
+                className="btn btn-danger-outline btn-sm"
+                id="inactivate-patient-btn"
+                onClick={() => setIsInactivateModalOpen(true)}
+              >
+                <UserX size={15} />
+                <span>Inativar paciente</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                id="activate-patient-btn"
+                onClick={() => setIsActivateModalOpen(true)}
+              >
+                <UserCheck size={15} />
+                <span>Reativar paciente</span>
+              </button>
+            )}
           </div>
         </div>
+
+        {/* FEEDBACK BANNERS */}
+        {successMessage && (
+          <div className="alert alert-success" id="patient-details-success-banner">
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {/* INACTIVE WARNING BANNER */}
+        {!patient.isActive && (
+          <div
+            className="alert alert-warning"
+            id="patient-inactive-warning-banner"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#fefce8',
+              borderColor: '#fef08a',
+              color: '#854d0e',
+              marginBottom: '16px',
+            }}
+          >
+            <AlertTriangle size={20} style={{ flexShrink: 0 }} />
+            <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <strong>Paciente Inativo:</strong> Este paciente está fora do funcionamento normal do consultório. Seus dados cadastrais, histórico clínico, medicamentos e prontuário continuam armazenados para consulta.
+            </div>
+          </div>
+        )}
 
         {/* PERSISTENT PATIENT SUMMARY BANNER */}
         <div className="patient-summary-banner" id="patient-summary-banner">
@@ -460,6 +548,14 @@ export function PatientDetailsPage({
           loading={inactivating}
           onClose={() => setIsInactivateModalOpen(false)}
           onConfirm={handleConfirmInactivate}
+        />
+
+        <ActivatePatientModal
+          patient={patient}
+          isOpen={isActivateModalOpen}
+          loading={activating}
+          onClose={() => setIsActivateModalOpen(false)}
+          onConfirm={handleConfirmActivate}
         />
       </div>
     </AppLayout>

@@ -5,6 +5,7 @@ import {
   House,
   LogOut,
   Settings,
+  UserX,
   Users,
 } from 'lucide-react';
 
@@ -24,6 +25,11 @@ const menuItems = [
     label: 'Pacientes',
     path: '/patients',
     icon: Users,
+  },
+  {
+    label: 'Pacientes inativos',
+    path: '/patients/inactive',
+    icon: UserX,
   },
   {
     label: 'Agenda',

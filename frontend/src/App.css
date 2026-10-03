@@ -454,6 +454,18 @@
   color: var(--text-secondary);
 }
 
+.badge-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.badge-warning {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid rgba(202, 138, 4, 0.2);
+}
+
 /* ========================================
    PAGE CONTAINER & HEADERS
    ======================================== */

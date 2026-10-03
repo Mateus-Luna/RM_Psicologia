@@ -1,4 +1,4 @@
-import { Eye, Pencil, Trash2, Pill, Stethoscope, ClipboardList } from 'lucide-react';
+import { Eye, Pencil, UserX, Pill, Stethoscope, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Patient } from '../../../types/patient';
 import { formatCPF, formatDate, formatPhone } from '../../../utils/formatters';
@@ -143,9 +143,10 @@ export function PatientTable({
                         className="btn-icon btn-icon-danger"
                         id={`inactivate-patient-${patient.id}`}
                         title="Inativar paciente"
+                        aria-label="Inativar paciente"
                         onClick={() => onInactivate(patient)}
                       >
-                        <Trash2 size={17} />
+                        <UserX size={17} />
                       </button>
                     </div>
                   </td>

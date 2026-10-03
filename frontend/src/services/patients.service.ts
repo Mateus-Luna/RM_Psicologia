@@ -58,4 +58,43 @@ export const patientsService = {
     const response = await api.delete<Patient>(`/patients/${id}`);
     return response.data;
   },
+
+  async inactivatePatient(id: number): Promise<Patient> {
+    const response = await api.delete<Patient>(`/patients/${id}`);
+    return response.data;
+  },
+
+  async getInactivePatients(filters?: PatientFilters): Promise<Patient[]> {
+    const params: Record<string, string> = {};
+
+    if (filters?.search && filters.search.trim()) {
+      params.search = filters.search.trim();
+    }
+
+    if (
+      filters?.hasMedicalFollowUp === 'true' ||
+      filters?.hasMedicalFollowUp === 'false'
+    ) {
+      params.hasMedicalFollowUp = filters.hasMedicalFollowUp;
+    }
+
+    if (
+      filters?.usesMedication === 'true' ||
+      filters?.usesMedication === 'false'
+    ) {
+      params.usesMedication = filters.usesMedication;
+    }
+
+    if (filters?.medication && filters.medication.trim()) {
+      params.medication = filters.medication.trim();
+    }
+
+    const response = await api.get<Patient[]>('/patients/inactive', { params });
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  async activatePatient(id: number): Promise<Patient> {
+    const response = await api.patch<Patient>(`/patients/${id}/activate`);
+    return response.data;
+  },
 };

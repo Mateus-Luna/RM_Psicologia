@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, UserX } from 'lucide-react';
 import axios from 'axios';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { patientsService } from '../../services/patients.service';
@@ -68,8 +68,8 @@ export function PatientsPage() {
 
     setInactivating(true);
     try {
-      await patientsService.deletePatient(patientToInactivate.id);
-      setSuccessMessage(`Paciente ${patientToInactivate.name} inativado com sucesso.`);
+      await patientsService.inactivatePatient(patientToInactivate.id);
+      setSuccessMessage('Paciente inativado com sucesso.');
       setPatientToInactivate(null);
       await fetchPatients(filters);
 
@@ -106,6 +106,31 @@ export function PatientsPage() {
           >
             <Plus size={18} />
             <span>Novo paciente</span>
+          </Link>
+        </div>
+
+        {/* NAVIGATION TABS: ATIVOS / INATIVOS */}
+        <div className="patient-tabs-nav" style={{ marginBottom: '16px' }} id="patients-view-tabs">
+          <Link
+            to="/patients"
+            className="patient-tab-btn active"
+            id="tab-active-patients"
+          >
+            <Users size={16} />
+            <span>Pacientes ativos</span>
+            {patients.length > 0 && (
+              <span className="tab-count-badge">
+                {patients.length}
+              </span>
+            )}
+          </Link>
+          <Link
+            to="/patients/inactive"
+            className="patient-tab-btn"
+            id="tab-inactive-patients"
+          >
+            <UserX size={16} />
+            <span>Pacientes inativos</span>
           </Link>
         </div>
 

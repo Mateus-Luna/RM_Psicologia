@@ -28,7 +28,9 @@ export function RecordsSelectPatientPage() {
     load();
   }, []);
 
-  const patientList = Array.isArray(patients) ? patients : [];
+  const patientList = Array.isArray(patients)
+    ? patients.filter((p) => p && p.isActive !== false)
+    : [];
   const filteredPatients = patientList.filter((p) => {
     if (!p) return false;
     if (!search.trim()) return true;
