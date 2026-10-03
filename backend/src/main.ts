@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.enableCors({
     origin: (origin, callback) => {
       if (
@@ -11,15 +12,18 @@ async function bootstrap() {
         origin === 'null' ||
         origin.startsWith('file://') ||
         origin.startsWith('http://localhost') ||
-        origin.startsWith('http://127.0.0.1')
+        origin.startsWith('http://127.0.0.1') ||
+        origin === 'http://192.168.0.7:3001'
       ) {
         callback(null, true);
         return;
       }
+
       callback(new Error('Bloqueado por CORS'), false);
     },
     credentials: true,
   });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -29,4 +33,5 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();
