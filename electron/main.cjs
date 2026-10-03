@@ -40,7 +40,7 @@ function loadPublicLicenseKey() {
 // Deve ser configurado antes de qualquer uso de app.getPath('userData').
 app.setPath(
   'userData',
-  path.join(app.getPath('appData'), 'RM_Psicologia'),
+  path.join(app.getPath('appData'), 'PsiFicha'),
 );
 
 // Determine environment: development vs production

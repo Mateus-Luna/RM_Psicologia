@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3');
 
-const db = new Database('./backup-test/RM-Psicologia-Backup.db', {
+const db = new Database('./backup-test/PsiFicha-Backup.db', {
   readonly: true,
 });
 

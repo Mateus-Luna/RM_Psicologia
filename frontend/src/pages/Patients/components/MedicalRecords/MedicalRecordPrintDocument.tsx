@@ -28,7 +28,7 @@ export function MedicalRecordPrintDocument({
       {/* CLINICAL HEADER */}
       <header className="print-header">
         <div className="print-clinic-branding">
-          <h1 className="print-clinic-name">RM PSICOLOGIA</h1>
+          <h1 className="print-clinic-name">PsiFicha</h1>
           <p className="print-clinic-subtitle">
             Sistema de Prontuário e Acompanhamento Psicológico
           </p>
@@ -159,7 +159,7 @@ export function MedicalRecordPrintDocument({
           <p className="print-signature-name">Profissional Responsável</p>
           <p className="print-signature-crp">Psicólogo(a) Clínico(a) — CRP</p>
           <p className="print-signature-date">
-            RM Psicologia • Sistema de Prontuário Eletrônico
+            PsiFicha • Sistema de Prontuário Eletrônico
           </p>
         </div>
       </footer>

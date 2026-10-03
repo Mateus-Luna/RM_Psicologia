@@ -36,7 +36,7 @@ export const backupService = {
       responseType: 'blob',
     });
 
-    let filename = 'RM-Psicologia-Backup.db';
+    let filename = 'PsiFicha-Backup.db';
     const disposition = response.headers?.['content-disposition'];
     if (disposition && typeof disposition === 'string') {
       const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
