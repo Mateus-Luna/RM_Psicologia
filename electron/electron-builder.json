@@ -1,21 +1,24 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.rmpsicologia.app",
-  "productName": "RM Psicologia",
+  "productName": "PsiFicha",
   "artifactName": "${productName}-Setup-${version}.${ext}",
   "directories": {
     "output": "../release",
     "buildResources": "assets"
   },
   "files": [
-    "main.cjs",
-    "assets/**/*",
-    {
-      "from": "../frontend/dist",
-      "to": "frontend/dist",
-      "filter": ["**/*"]
-    }
-  ],
+  "main.cjs",
+  "license.cjs",
+  "license-preload.cjs",
+  "license/public.pem",
+  "assets/**/*",
+  {
+    "from": "../frontend/dist",
+    "to": "frontend/dist",
+    "filter": ["**/*"]
+  }
+],
   "extraResources": [
     {
       "from": "../backend/dist",
@@ -58,7 +61,7 @@
       }
     ],
     "icon": "assets/icon.ico",
-    "executableName": "RM Psicologia"
+    "executableName": "PsiFicha"
   },
   "nsis": {
     "oneClick": false,
@@ -66,8 +69,8 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "RM Psicologia",
-    "uninstallDisplayName": "RM Psicologia ${version}",
+    "shortcutName": "PsiFicha",
+    "uninstallDisplayName": "PsiFicha ${version}",
     "deleteAppDataOnUninstall": false
   }
 }

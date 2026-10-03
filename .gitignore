@@ -10,3 +10,5 @@ out/
 .DS_Store
 frontend/.auth_db.json
 release/
+electron/license/private.pem
+tools/

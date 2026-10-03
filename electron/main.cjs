@@ -1,12 +1,40 @@
-const { app, BrowserWindow, safeStorage } = require('electron');
+const { app, BrowserWindow, safeStorage, ipcMain, } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const crypto = require('crypto');
 
+const {
+  getMachineId,
+  getLicenseStatus,
+  verifyLicenseToken,
+  saveLicense,
+} = require('./license.cjs');
+
 let backendProcess = null;
 let mainWindow = null;
+
+const PUBLIC_KEY_PATH = path.join(
+  __dirname,
+  'license',
+  'public.pem',
+);
+
+let publicLicenseKey = null;
+
+function loadPublicLicenseKey() {
+  if (!fs.existsSync(PUBLIC_KEY_PATH)) {
+    throw new Error(
+      `Chave pública da licença não encontrada: ${PUBLIC_KEY_PATH}`,
+    );
+  }
+
+  publicLicenseKey = fs.readFileSync(
+    PUBLIC_KEY_PATH,
+    'utf8',
+  );
+}
 
 // Define um diretório próprio para os dados persistentes da aplicação.
 // Deve ser configurado antes de qualquer uso de app.getPath('userData').
@@ -225,7 +253,7 @@ function createWindow() {
     height: 900,
     minWidth: 1100,
     minHeight: 700,
-    title: 'RM Psicologia',
+    title: 'PsiFicha',
     icon: fs.existsSync(iconPath) ? iconPath : undefined,
     webPreferences: {
       contextIsolation: true,
@@ -256,6 +284,227 @@ function stopBackend() {
   }
 }
 
+let licenseWindow = null;
+
+function createLicenseWindow() {
+  licenseWindow = new BrowserWindow({
+    width: 620,
+    height: 520,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    title: 'Ativação - PsiFicha',
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(
+        __dirname,
+        'license-preload.cjs',
+      ),
+    },
+  });
+
+  const machineId = getMachineId();
+
+  const html = `
+  <!DOCTYPE html>
+  <html lang="pt-BR">
+  <head>
+  <meta charset="UTF-8">
+  <title>Ativação - PsiFicha</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      background: #f5f7fa;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .machine {
+      padding: 14px;
+      background: #e5e7eb;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 16px;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      user-select: text;
+    }
+
+    textarea {
+      width: 100%;
+      height: 130px;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      resize: none;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: default;
+    }
+
+    .error {
+      margin-top: 15px;
+      color: #dc2626;
+      min-height: 20px;
+    }
+
+    .info {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+  </style>
+  </head>
+
+  <body>
+
+  <div class="container">
+
+    <h1>Ativar PsiFicha</h1>
+
+    <div class="subtitle">
+      Este computador ainda não possui uma licença ativada.
+    </div>
+
+    <label>Identificador deste computador</label>
+
+    <div class="machine" id="machineId">
+      ${machineId}
+    </div>
+
+    <label for="license">
+      Chave de licença
+    </label>
+
+    <textarea
+      id="license"
+      placeholder="Cole aqui a chave de licença fornecida pelo administrador."
+    ></textarea>
+
+    <button id="activate">
+      Ativar aplicativo
+    </button>
+
+    <div
+      class="error"
+      id="error"
+    ></div>
+
+    <div class="info">
+      Envie o identificador do computador ao responsável
+      pela licença para receber uma chave de ativação.
+    </div>
+
+  </div>
+
+  <script>
+    const button = document.getElementById('activate');
+    const textarea = document.getElementById('license');
+    const error = document.getElementById('error');
+
+    button.addEventListener('click', async () => {
+      error.textContent = '';
+
+      const license = textarea.value.trim();
+
+      if (!license) {
+        error.textContent = 'Informe a chave de licença.';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Ativando...';
+
+      try {
+        const result =
+          await window.licenseAPI.activate(license);
+
+        if (!result.valid) {
+          error.textContent =
+            result.reason || 'Licença inválida.';
+          return;
+        }
+
+        window.location.reload();
+
+      } catch (err) {
+        error.textContent =
+          'Não foi possível ativar o aplicativo.';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Ativar aplicativo';
+      }
+    });
+  </script>
+
+  </body>
+  </html>
+  `;
+
+  licenseWindow.loadURL(
+    `data:text/html;charset=utf-8,${encodeURIComponent(html)}`,
+  );
+
+  licenseWindow.on('closed', () => {
+    licenseWindow = null;
+  });
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -269,24 +518,50 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(async () => {
-    startBackend();
+  try {
+    loadPublicLicenseKey();
+  } catch (error) {
+    console.error(
+      '[License] Erro ao carregar licença:',
+      error,
+    );
 
-    try {
-      await waitForBackend();
+    app.quit();
+    return;
+  }
+
+  const licenseStatus = getLicenseStatus(
+    app.getPath('userData'),
+    publicLicenseKey,
+  );
+
+  if (!licenseStatus.valid) {
+    createLicenseWindow();
+    return;
+  }
+
+  startBackend();
+
+  try {
+    await waitForBackend();
+    createWindow();
+  } catch (error) {
+    console.error(
+      'Erro ao aguardar o backend:',
+      error,
+    );
+
+    stopBackend();
+    app.quit();
+    return;
+  }
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
-    } catch (error) {
-      console.error('Erro ao aguardar o backend:', error);
-      stopBackend();
-      app.quit();
-      return;
     }
-
-    app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-      }
-    });
   });
+});
 }
 
 app.on('before-quit', stopBackend);
@@ -298,3 +573,31 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+ipcMain.handle(
+  'license:activate',
+  (_event, licenseToken) => {
+    const normalizedLicenseToken = String(licenseToken || '')
+      .trim()
+      .replace(/\r?\n/g, '');
+
+    const result = verifyLicenseToken(
+      normalizedLicenseToken,
+      publicLicenseKey,
+    );
+
+    if (!result.valid) {
+      return result;
+    }
+
+    saveLicense(
+      app.getPath('userData'),
+      normalizedLicenseToken,
+    );
+
+    return {
+      valid: true,
+      payload: result.payload,
+    };
+  },
+);

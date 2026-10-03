@@ -1,13 +1,13 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
+Body,
+Controller,
+Delete,
+Get,
+Param,
+ParseIntPipe,
+Patch,
+Post,
+Query,
 } from '@nestjs/common';
 
 import { PatientsService } from './patients.service';
@@ -17,35 +17,45 @@ import { FindPatientsDto } from './dto/find-patients.dto';
 
 @Controller('patients')
 export class PatientsController {
-  constructor(
-    private readonly patientsService: PatientsService,
-  ) {}
+constructor(
+private readonly patientsService: PatientsService,
+) {}
 
-  @Post()
-  create(@Body() createPatientDto: CreatePatientDto) {
-    return this.patientsService.create(createPatientDto);
-  }
+@Post()
+create(@Body() createPatientDto: CreatePatientDto) {
+return this.patientsService.create(createPatientDto);
+}
 
-  @Get()
-  findAll(@Query() filters: FindPatientsDto) {
-    return this.patientsService.findAll(filters);
-  }
+@Get()
+findAll(@Query() filters: FindPatientsDto) {
+return this.patientsService.findAll(filters);
+}
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.patientsService.findOne(id);
-  }
+@Get('inactive')
+findInactive() {
+return this.patientsService.findInactive();
+}
 
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updatePatientDto: UpdatePatientDto,
-  ) {
-    return this.patientsService.update(id, updatePatientDto);
-  }
+@Get(':id')
+findOne(@Param('id', ParseIntPipe) id: number) {
+return this.patientsService.findOne(id);
+}
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.patientsService.remove(id);
-  }
+@Patch(':id/activate')
+activate(@Param('id', ParseIntPipe) id: number) {
+return this.patientsService.activate(id);
+}
+
+@Patch(':id')
+update(
+@Param('id', ParseIntPipe) id: number,
+@Body() updatePatientDto: UpdatePatientDto,
+) {
+return this.patientsService.update(id, updatePatientDto);
+}
+
+@Delete(':id')
+remove(@Param('id', ParseIntPipe) id: number) {
+return this.patientsService.remove(id);
+}
 }
