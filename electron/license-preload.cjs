@@ -13,3 +13,14 @@ contextBridge.exposeInMainWorld('licenseAPI', {
       licenseKey,
     ),
 });
+
+contextBridge.exposeInMainWorld('logoAPI', {
+  select: () =>
+    ipcRenderer.invoke('logo:select'),
+
+  get: () =>
+    ipcRenderer.invoke('logo:get'),
+
+  remove: () =>
+    ipcRenderer.invoke('logo:remove'),
+});

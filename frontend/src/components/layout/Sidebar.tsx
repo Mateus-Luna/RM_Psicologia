@@ -9,7 +9,6 @@ import {
   Users,
 } from 'lucide-react';
 
-import logo from '../../assets/logo/RENATO LOGO  AZUL.png';
 
 interface SidebarProps {
   onLogout: () => void;
@@ -49,11 +48,39 @@ const menuItems = [
 ];
 
 export function Sidebar({ onLogout }: SidebarProps) {
+  async function handleLogoClick() {
+    try {
+      const result = await window.logoAPI.selectLogo();
+
+      if (result?.success) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar logomarca:', error);
+    }
+  }
+
+  const logoSrc = window.logoAPI?.getLogoUrl?.();
+
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <img src={logo} alt="Renato Psic" />
-      </div>
+      <button
+        type="button"
+        className="sidebar-logo"
+        onClick={handleLogoClick}
+        title="Alterar logomarca"
+      >
+        {logoSrc ? (
+          <img
+            src={logoSrc}
+            alt="Logomarca"
+          />
+        ) : (
+          <span className="sidebar-logo-placeholder">
+            PsiFicha
+          </span>
+        )}
+      </button>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {

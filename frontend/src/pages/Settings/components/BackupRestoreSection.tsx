@@ -38,8 +38,15 @@ export function BackupRestoreSection() {
     setBackupSuccessMessage('');
 
     try {
-      await backupService.downloadBackup();
-      setBackupSuccessMessage('Backup realizado com sucesso.');
+      const result = await backupService.downloadBackup();
+
+      if (result.canceled) {
+        return;
+      }
+
+      setBackupSuccessMessage(
+        'Backup realizado com sucesso.',
+      );
 
       // Clear success feedback after 5 seconds
       setTimeout(() => {
@@ -211,9 +218,9 @@ export function BackupRestoreSection() {
             <span>Como fazer um backup?</span>
           </div>
           <ol style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '3px', lineHeight: '1.4' }}>
-            <li>Clique em &quot;Fazer backup&quot;.</li>
-            <li>O arquivo será baixado pelo navegador (formato .db).</li>
-            <li>Guarde o arquivo em um local seguro ou nuvem externa.</li>
+          <li>Clique em &quot;Fazer backup&quot;.</li>
+          <li>Escolha a pasta e o nome do arquivo na janela que será aberta.</li>
+          <li>Guarde o backup em um local seguro.</li>
           </ol>
           <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
             <strong>Recomendação:</strong> Faça backups regularmente e mantenha uma cópia em um local seguro.

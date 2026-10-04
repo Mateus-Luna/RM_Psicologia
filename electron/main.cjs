@@ -1,4 +1,4 @@
-const { app, BrowserWindow, safeStorage, ipcMain, } = require('electron');
+const { app, BrowserWindow, safeStorage, ipcMain, dialog, } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
@@ -92,6 +92,105 @@ function getOrGenerateEncryptionKey() {
   }
 
   return newKey;
+}
+
+function getBrandingDirectory() {
+  const brandingDirectory = path.join(
+    app.getPath('userData'),
+    'branding',
+  );
+
+  fs.mkdirSync(brandingDirectory, {
+    recursive: true,
+  });
+
+  return brandingDirectory;
+}
+
+function getBrandingDirectory() {
+  const brandingDirectory = path.join(
+    app.getPath('userData'),
+    'branding',
+  );
+
+  fs.mkdirSync(brandingDirectory, {
+    recursive: true,
+  });
+
+  return brandingDirectory;
+}
+
+function getLogoPath() {
+  const brandingDirectory = getBrandingDirectory();
+
+  const extensions = [
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.webp',
+  ];
+
+  for (const extension of extensions) {
+    const candidate = path.join(
+      brandingDirectory,
+      `logo${extension}`,
+    );
+
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function getLogoMimeType(filePath) {
+  const extension = path
+    .extname(filePath)
+    .toLowerCase();
+
+  const mimeTypes = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+  };
+
+  return mimeTypes[extension] ?? null;
+}
+
+function getLogoExtension(filePath) {
+  const extension = path
+    .extname(filePath)
+    .toLowerCase();
+
+  const allowedExtensions = [
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.webp',
+  ];
+
+  return allowedExtensions.includes(extension)
+    ? extension
+    : null;
+}
+
+function getLogoExtension(filePath) {
+  const extension = path
+    .extname(filePath)
+    .toLowerCase();
+
+  const allowedExtensions = [
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.webp',
+  ];
+
+  return allowedExtensions.includes(extension)
+    ? extension
+    : null;
 }
 
 function getBackendPaths() {
@@ -258,6 +357,10 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(
+    __dirname,
+    'preload.cjs',
+  ),
     },
   });
 
@@ -564,6 +667,60 @@ if (!gotTheLock) {
 });
 }
 
+ipcMain.handle('backup:save', async (_event, { buffer, filename }) => {
+  try {
+    if (!buffer) {
+      return {
+        success: false,
+        canceled: false,
+        error: 'Nenhum arquivo de backup foi recebido.',
+      };
+    }
+
+    const result = await dialog.showSaveDialog({
+      title: 'Salvar backup do PsiFicha',
+      defaultPath: filename || 'PsiFicha-Backup.db',
+      filters: [
+        {
+          name: 'Banco de dados SQLite',
+          extensions: ['db'],
+        },
+      ],
+    });
+
+    if (result.canceled || !result.filePath) {
+      return {
+        success: false,
+        canceled: true,
+      };
+    }
+
+    const fileBuffer = Buffer.from(buffer);
+
+    await fs.promises.writeFile(
+      result.filePath,
+      fileBuffer,
+    );
+
+    return {
+      success: true,
+      canceled: false,
+      filePath: result.filePath,
+    };
+  } catch (error) {
+    console.error(
+      '[Backup] Erro ao salvar backup:',
+      error,
+    );
+
+    return {
+      success: false,
+      canceled: false,
+      error: 'Não foi possível salvar o backup no local escolhido.',
+    };
+  }
+});
+
 app.on('before-quit', stopBackend);
 app.on('will-quit', stopBackend);
 
@@ -599,5 +756,232 @@ ipcMain.handle(
       valid: true,
       payload: result.payload,
     };
+  },
+);
+
+ipcMain.handle(
+  'logo:select',
+  async () => {
+    const result = await dialog.showOpenDialog(
+      mainWindow,
+      {
+        title: 'Selecionar logomarca',
+        properties: ['openFile'],
+        filters: [
+          {
+            name: 'Imagens',
+            extensions: [
+              'png',
+              'jpg',
+              'jpeg',
+              'webp',
+            ],
+          },
+        ],
+      },
+    );
+
+    if (
+      result.canceled ||
+      !result.filePaths.length
+    ) {
+      return {
+        success: false,
+        canceled: true,
+      };
+    }
+
+    const sourcePath = result.filePaths[0];
+
+    const extension =
+      getLogoExtension(sourcePath);
+
+    if (!extension) {
+      return {
+        success: false,
+        message:
+          'Formato de imagem não permitido.',
+      };
+    }
+
+    try {
+      const stats = fs.statSync(sourcePath);
+
+      const maxSize =
+        5 * 1024 * 1024;
+
+      if (stats.size > maxSize) {
+        return {
+          success: false,
+          message:
+            'A logomarca deve ter no máximo 5 MB.',
+        };
+      }
+
+      const brandingDirectory =
+        getBrandingDirectory();
+
+      const temporaryPath = path.join(
+        brandingDirectory,
+        `logo-temp${extension}`,
+      );
+
+      const finalPath = path.join(
+        brandingDirectory,
+        `logo${extension}`,
+      );
+
+      /*
+       * Remove eventuais logos antigas antes
+       * de concluir a substituição.
+       */
+      const existingExtensions = [
+        '.png',
+        '.jpg',
+        '.jpeg',
+        '.webp',
+      ];
+
+      /*
+       * Primeiro copiamos para um arquivo
+       * temporário. Assim, se a cópia falhar,
+       * a logo atual continua intacta.
+       */
+      fs.copyFileSync(
+        sourcePath,
+        temporaryPath,
+      );
+
+      /*
+       * Depois que a nova imagem foi copiada
+       * com sucesso, removemos a logo anterior.
+       */
+      for (const existingExtension of existingExtensions) {
+        const existingPath = path.join(
+          brandingDirectory,
+          `logo${existingExtension}`,
+        );
+
+        if (
+          existingPath !== finalPath &&
+          fs.existsSync(existingPath)
+        ) {
+          fs.unlinkSync(existingPath);
+        }
+      }
+
+      /*
+       * Remove eventual arquivo final do
+       * mesmo formato antes de renomear.
+       */
+      if (fs.existsSync(finalPath)) {
+        fs.unlinkSync(finalPath);
+      }
+
+      fs.renameSync(
+        temporaryPath,
+        finalPath,
+      );
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error(
+        '[Logo] Erro ao salvar logomarca:',
+        error,
+      );
+
+      return {
+        success: false,
+        message:
+          'Não foi possível salvar a logomarca.',
+      };
+    }
+  },
+);
+
+ipcMain.handle(
+  'logo:get',
+  async () => {
+    const logoPath = getLogoPath();
+
+    if (!logoPath) {
+      return {
+        exists: false,
+      };
+    }
+
+    try {
+      const buffer =
+        fs.readFileSync(logoPath);
+
+      const mimeType =
+        getLogoMimeType(logoPath);
+
+      if (!mimeType) {
+        return {
+          exists: false,
+        };
+      }
+
+      return {
+        exists: true,
+        data: buffer.toString('base64'),
+        mimeType,
+      };
+    } catch (error) {
+      console.error(
+        '[Logo] Erro ao carregar logomarca:',
+        error,
+      );
+
+      return {
+        exists: false,
+      };
+    }
+  },
+);
+
+ipcMain.handle(
+  'logo:remove',
+  async () => {
+    try {
+      const brandingDirectory =
+        getBrandingDirectory();
+
+      const extensions = [
+        '.png',
+        '.jpg',
+        '.jpeg',
+        '.webp',
+      ];
+
+      for (const extension of extensions) {
+        const logoPath = path.join(
+          brandingDirectory,
+          `logo${extension}`,
+        );
+
+        if (fs.existsSync(logoPath)) {
+          fs.unlinkSync(logoPath);
+        }
+      }
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error(
+        '[Logo] Erro ao remover logomarca:',
+        error,
+      );
+
+      return {
+        success: false,
+        message:
+          'Não foi possível remover a logomarca.',
+      };
+    }
   },
 );
