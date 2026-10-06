@@ -174,7 +174,7 @@ export class RestoreService {
       ].join('-');
 
       const safetyBackupFilename =
-        `RM-Psicologia-Pre-Restore-${date}-${time}-${randomBytes(4).toString('hex')}.db`;
+        `PsiFicha-Pre-Restore-${date}-${time}-${randomBytes(4).toString('hex')}.db`;
 
       const backupsDirectory =
         process.env.BACKUPS_DIR ||

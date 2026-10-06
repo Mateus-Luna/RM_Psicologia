@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   CalendarDays,
@@ -48,6 +49,35 @@ const menuItems = [
 ];
 
 export function Sidebar({ onLogout }: SidebarProps) {
+  const [logoSrc, setLogoSrc] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadLogo() {
+      try {
+        const result =
+          await window.logoAPI?.getLogo?.();
+
+        if (
+          result?.exists &&
+          result.data &&
+          result.mimeType
+        ) {
+          setLogoSrc(
+            `data:${result.mimeType};base64,${result.data}`,
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Erro ao carregar logomarca:',
+          error,
+        );
+      }
+    }
+
+    void loadLogo();
+  }, []);
+
   async function handleLogoClick() {
     try {
       const result = await window.logoAPI.selectLogo();
@@ -60,7 +90,6 @@ export function Sidebar({ onLogout }: SidebarProps) {
     }
   }
 
-  const logoSrc = window.logoAPI?.getLogoUrl?.();
 
   return (
     <aside className="sidebar">

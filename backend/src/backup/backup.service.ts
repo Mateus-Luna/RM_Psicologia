@@ -67,7 +67,7 @@ export class BackupService {
         String(now.getSeconds()).padStart(2, '0'),
       ].join('-');
 
-      const filename = `RM-Psicologia-Backup-${date}-${time}.db`;
+      const filename = `PsiFicha-Backup-${date}-${time}.db`;
 
       return {
         buffer,

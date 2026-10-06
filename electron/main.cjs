@@ -731,6 +731,17 @@ app.on('window-all-closed', () => {
   }
 });
 
+app.on('before-quit', stopBackend);
+app.on('will-quit', stopBackend);
+
+app.on('window-all-closed', () => {
+  stopBackend();
+
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
 ipcMain.handle(
   'license:activate',
   (_event, licenseToken) => {
@@ -984,4 +995,6 @@ ipcMain.handle(
       };
     }
   },
+
+
 );

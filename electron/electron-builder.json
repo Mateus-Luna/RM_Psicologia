@@ -7,8 +7,9 @@
     "output": "../release",
     "buildResources": "assets"
   },
-  "files": [
+"files": [
   "main.cjs",
+  "preload.cjs",
   "license.cjs",
   "license-preload.cjs",
   "license/public.pem",
@@ -20,33 +21,37 @@
   }
 ],
   "extraResources": [
-    {
-      "from": "../backend/dist",
-      "to": "backend/dist",
-      "filter": ["**/*"]
-    },
-    {
-      "from": "../backend/prisma/migrations",
-      "to": "backend/prisma/migrations",
-      "filter": ["**/*"]
-    },
-    {
-      "from": "../backend/generated/prisma",
-      "to": "backend/generated/prisma",
-      "filter": ["**/*"]
-    },
-    {
-      "from": "../backend/node_modules",
-      "to": "backend/node_modules",
-      "filter": [
-        "**/*",
-        "!**/*.md",
-        "!**/*.ts",
-        "!**/test/**",
-        "!**/tests/**"
-      ]
-    }
-  ],
+  {
+    "from": "../backend/dist",
+    "to": "backend/dist",
+    "filter": ["**/*"]
+  },
+  {
+    "from": "../backend/prisma/migrations",
+    "to": "backend/prisma/migrations",
+    "filter": ["**/*"]
+  },
+  {
+    "from": "../backend/generated/prisma",
+    "to": "backend/generated/prisma",
+    "filter": ["**/*"]
+  },
+  {
+    "from": "../backend/node_modules",
+    "to": "backend/node_modules",
+    "filter": [
+      "**/*",
+      "!**/*.md",
+      "!**/*.ts",
+      "!**/test/**",
+      "!**/tests/**"
+    ]
+  },
+  {
+    "from": "../backend/package.json",
+    "to": "backend/package.json"
+  }
+],
   "npmRebuild": false,
   "asar": true,
   "asarUnpack": [

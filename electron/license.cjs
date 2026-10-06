@@ -141,8 +141,10 @@ function verifyLicenseToken(token, publicKey) {
 
     const currentMachine = getMachineFingerprint();
 
-    if (payload.machine !== currentMachine) {
-      return {
+    if (
+      payload.machine.toUpperCase() !==
+      currentMachine.toUpperCase()
+    ) {      return {
         valid: false,
         reason: 'Esta licença pertence a outro computador.',
       };

@@ -33,7 +33,7 @@ export function Startup() {
 
   return (
     <main>
-      <h1>Renato Psic</h1>
+      <h1>PsiFicha</h1>
       <p>Carregando...</p>
     </main>
   );

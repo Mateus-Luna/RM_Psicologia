@@ -31,39 +31,61 @@ export async function extractApiErrorMessage(
 }
 
 export const backupService = {
-  async downloadBackup(): Promise<{ filename: string }> {
-    const response = await api.get('/backup', {
-      responseType: 'blob',
-    });
+  async downloadBackup(): Promise<{
+  filename: string;
+  canceled: boolean;
+}> {
+  const response = await api.get('/backup', {
+    responseType: 'arraybuffer',
+  });
 
-    let filename = 'PsiFicha-Backup.db';
-    const disposition = response.headers?.['content-disposition'];
-    if (disposition && typeof disposition === 'string') {
-      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-      if (match && match[1]) {
-        filename = match[1].replace(/['"]/g, '').trim();
-      }
+  let filename = 'PsiFicha-Backup.db';
+
+  const disposition =
+    response.headers?.['content-disposition'];
+
+  if (disposition && typeof disposition === 'string') {
+    const match = disposition.match(
+      /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
+    );
+
+    if (match && match[1]) {
+      filename = match[1]
+        .replace(/['"]/g, '')
+        .trim();
     }
+  }
 
-    const contentType =
-      typeof response.headers?.['content-type'] === 'string'
-        ? response.headers['content-type']
-        : 'application/x-sqlite3';
+  if (!window.backupAPI) {
+    throw new Error(
+      'A funcionalidade de salvamento de backup do aplicativo não está disponível.',
+    );
+  }
 
-    const blob = new Blob([response.data], {
-      type: contentType,
-    });
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = downloadUrl;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    window.URL.revokeObjectURL(downloadUrl);
+  const result = await window.backupAPI.saveBackup(
+    response.data,
+    filename,
+  );
 
-    return { filename };
-  },
+  if (result.canceled) {
+    return {
+      filename,
+      canceled: true,
+    };
+  }
+
+  if (!result.success) {
+    throw new Error(
+      result.error ||
+        'Não foi possível salvar o backup.',
+    );
+  }
+
+  return {
+    filename,
+    canceled: false,
+  };
+},
 
   async restoreBackup(file: File): Promise<RestoreBackupResponse> {
     const formData = new FormData();

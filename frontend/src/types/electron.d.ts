@@ -9,8 +9,13 @@ declare global {
         path?: string;
       }>;
 
-      getLogoUrl: () => string | null;
+      getLogo: () => Promise<{
+        exists: boolean;
+        data?: string;
+        mimeType?: string;
+      }>;
     };
+
     backupAPI: {
       saveBackup: (
         buffer: ArrayBuffer,
