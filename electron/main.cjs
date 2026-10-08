@@ -745,31 +745,61 @@ app.on('window-all-closed', () => {
 ipcMain.handle(
   'license:activate',
   (_event, licenseToken) => {
-    const normalizedLicenseToken = String(licenseToken || '')
-      .trim()
-      .replace(/\r?\n/g, '');
+    try {
+      fs.appendFileSync(
+        path.join(app.getPath('userData'), 'license-debug.log'),
+        `[${new Date().toISOString()}] license:activate chamado\n`,
+      );
 
-    const result = verifyLicenseToken(
-      normalizedLicenseToken,
-      publicLicenseKey,
-    );
+      const normalizedLicenseToken = String(
+        licenseToken || '',
+      )
+        .trim()
+        .replace(/\r?\n/g, '');
 
-    if (!result.valid) {
-      return result;
+      fs.appendFileSync(
+        path.join(app.getPath('userData'), 'license-debug.log'),
+        `[${new Date().toISOString()}] token recebido: ${normalizedLicenseToken ? 'SIM' : 'NAO'}\n`,
+      );
+
+      const result = verifyLicenseToken(
+        normalizedLicenseToken,
+        publicLicenseKey,
+      );
+
+      fs.appendFileSync(
+        path.join(app.getPath('userData'), 'license-debug.log'),
+        `[${new Date().toISOString()}] resultado: ${JSON.stringify(result)}\n`,
+      );
+
+      if (!result.valid) {
+        return result;
+      }
+
+      saveLicense(
+        app.getPath('userData'),
+        normalizedLicenseToken,
+      );
+
+      fs.appendFileSync(
+        path.join(app.getPath('userData'), 'license-debug.log'),
+        `[${new Date().toISOString()}] licença salva com sucesso\n`,
+      );
+
+      return {
+        valid: true,
+        payload: result.payload,
+      };
+    } catch (error) {
+      fs.appendFileSync(
+        path.join(app.getPath('userData'), 'license-debug.log'),
+        `[${new Date().toISOString()}] ERRO: ${error?.stack || error}\n`,
+      );
+
+      throw error;
     }
-
-    saveLicense(
-      app.getPath('userData'),
-      normalizedLicenseToken,
-    );
-
-    return {
-      valid: true,
-      payload: result.payload,
-    };
   },
 );
-
 ipcMain.handle(
   'logo:select',
   async () => {
