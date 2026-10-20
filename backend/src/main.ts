@@ -13,7 +13,8 @@ async function bootstrap() {
         origin.startsWith('file://') ||
         origin.startsWith('http://localhost') ||
         origin.startsWith('http://127.0.0.1') ||
-        origin === 'http://192.168.0.7:3001'
+        origin === 'http://192.168.0.7:3001' ||
+	origin === 'http://192.168.0.5:3001'
       ) {
         callback(null, true);
         return;

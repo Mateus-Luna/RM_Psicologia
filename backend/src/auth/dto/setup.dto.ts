@@ -7,5 +7,10 @@ export class SetupDto {
 
   @IsString()
   @MinLength(8)
+  @IsNotEmpty()
   password!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  crp!: string;
 }

@@ -16,6 +16,7 @@ model User {
   id           Int      @id @default(autoincrement())
   name         String
   passwordHash String
+  crp          String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   sessions     Session[]

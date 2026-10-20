@@ -31,14 +31,16 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        name: setupDto.name,
-        passwordHash,
-      },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
-      },
+      name: setupDto.name,
+      crp: setupDto.crp.trim(),
+      passwordHash,
+    },
+    select: {
+      id: true,
+      name: true,
+      crp: true,
+      createdAt: true,
+    },
     });
 
     return user;
