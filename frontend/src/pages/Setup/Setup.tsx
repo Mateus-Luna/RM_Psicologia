@@ -1,3 +1,4 @@
+
 import { type FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,6 +8,7 @@ export function Setup() {
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
+  const [crp, setCrp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -18,6 +20,11 @@ export function Setup() {
 
     setError('');
 
+    if (!crp.trim()) {
+      setError('Informe o CRP do psicólogo.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('As senhas não coincidem.');
       return;
@@ -27,7 +34,8 @@ export function Setup() {
 
     try {
       await api.post('/auth/setup', {
-        name,
+        name: name.trim(),
+        crp: crp.trim(),
         password,
       });
 
@@ -51,31 +59,43 @@ export function Setup() {
       <h1>Configuração inicial</h1>
 
       <p>
-        Configure o sistema informando o nome do psicólogo e uma senha
-        de acesso.
+        Configure o sistema informando o nome do psicólogo,
+        seu CRP e uma senha de acesso.
       </p>
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="name">Nome</label>
-
+          <label htmlFor="name">Nome completo do psicólogo</label>
           <input
             id="name"
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
+            autoComplete="name"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="crp">CRP</label>
+          <input
+            id="crp"
+            type="text"
+            value={crp}
+            onChange={(event) => setCrp(event.target.value)}
+            placeholder="Ex.:00/12345"
             required
           />
         </div>
 
         <div>
           <label htmlFor="password">Senha</label>
-
           <input
             id="password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="new-password"
             minLength={8}
             required
           />
@@ -85,7 +105,6 @@ export function Setup() {
           <label htmlFor="confirmPassword">
             Confirmar senha
           </label>
-
           <input
             id="confirmPassword"
             type="password"
@@ -93,12 +112,13 @@ export function Setup() {
             onChange={(event) =>
               setConfirmPassword(event.target.value)
             }
+            autoComplete="new-password"
             minLength={8}
             required
           />
         </div>
 
-        {error && <p>{error}</p>}
+        {error && <p role="alert">{error}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Configurando...' : 'Configurar sistema'}

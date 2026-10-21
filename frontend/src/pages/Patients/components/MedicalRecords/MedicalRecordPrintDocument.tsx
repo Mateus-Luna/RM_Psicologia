@@ -34,6 +34,18 @@ export function MedicalRecordPrintDocument({
       return 'Profissional Responsável';
     }
   })();
+  const professionalCrp = (() => {
+    try {
+      const session = sessionStorage.getItem('renato_psic_session');
+      const user = session ? JSON.parse(session) : null;
+
+      return typeof user?.crp === 'string' && user.crp.trim()
+        ? user.crp.trim()
+        : 'CRP não informado';
+    } catch {
+      return 'CRP não informado';
+    }
+  })();
 
   return (
     <div id="medical-record-print-document" className="print-document">
@@ -165,24 +177,26 @@ export function MedicalRecordPrintDocument({
       </section>
 
       
-      {/* PROFESSIONAL SIGNATURE BLOCK */}
-        <footer className="print-signature-section">
-          <div className="print-signature-box">
-            <p className="print-signature-name">
-              {professionalName}
-            </p>
+      
+    {/* PROFESSIONAL SIGNATURE BLOCK */}
+    <footer className="print-signature-section">
+      <div className="print-signature-box">
+        <div className="print-signature-line" />
 
-            <div className="print-signature-line" />
+        <p className="print-signature-name">
+          {professionalName}
+        </p>
 
-            <p className="print-signature-crp">
-              Psicólogo(a) Clínico(a) — CRP
-            </p>
+        <p className="print-signature-crp">
+          CRP: {professionalCrp}
+        </p>
 
-            <p className="print-signature-date">
-              PsiFicha • Sistema de Prontuário Eletrônico
-            </p>
-          </div>
-        </footer>
+        <p className="print-signature-date">
+          PsiFicha • Sistema de Prontuário Eletrônico
+        </p>
+      </div>
+    </footer>
+
 
     </div>
   );

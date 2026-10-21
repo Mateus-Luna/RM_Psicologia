@@ -26,6 +26,7 @@ export function Login() {
         JSON.stringify({
           id: response.data.id,
           name: response.data.name,
+          crp: response.data.crp,
           expiresAt: response.data.expiresAt,
           token: response.data.token,
         }),

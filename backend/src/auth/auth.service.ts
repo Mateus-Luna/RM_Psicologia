@@ -85,6 +85,7 @@ export class AuthService {
     return {
       id: user.id,
       name: user.name,
+      crp: user.crp,
       token,
       expiresAt,
     };
