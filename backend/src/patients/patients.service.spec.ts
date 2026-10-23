@@ -454,7 +454,6 @@ describe('remove', () => {
     expect(prisma.patient.findFirst).toHaveBeenCalledWith({
       where: {
         id: 1,
-        isActive: true,
       },
       include: {
         medications: {
@@ -499,5 +498,57 @@ describe('remove', () => {
 
     expect(prisma.appointment.updateMany).not.toHaveBeenCalled();
     expect(prisma.patient.update).not.toHaveBeenCalled();
+  });
+
+  it('deve lançar NotFoundException ao tentar inativar um paciente que já está inativo', async () => {
+    prisma.patient.findFirst.mockResolvedValue({
+      id: 1,
+      name: 'João',
+      isActive: false,
+      medications: [],
+    });
+
+    await expect(service.remove(1)).rejects.toThrow(
+      new NotFoundException('Paciente não encontrado.'),
+    );
+
+    expect(prisma.appointment.updateMany).not.toHaveBeenCalled();
+    expect(prisma.patient.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('findOne', () => {
+  it('deve retornar um paciente inativo pelo id', async () => {
+    const inactivePatient = {
+      id: 5,
+      name: 'Maria Inativa',
+      cpf: '12345678900',
+      phone: '83988888888',
+      diagnosticHypothesis: null,
+      doctorName: null,
+      generalNotes: null,
+      isActive: false,
+      medications: [],
+    };
+
+    prisma.patient.findFirst.mockResolvedValue(inactivePatient);
+
+    const result = await service.findOne(5);
+
+    expect(prisma.patient.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 5,
+      },
+      include: {
+        medications: {
+          where: {
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    expect(result).toEqual(inactivePatient);
+    expect(result.isActive).toBe(false);
   });
 });

@@ -254,6 +254,35 @@ describe('MedicalRecordsService', () => {
       });
     });
 
+    it('should return medical records even when patient is inactive', async () => {
+      prisma.patient.findFirst.mockResolvedValue({
+        id: 7,
+        isActive: false,
+      });
+
+      const entries = [
+        {
+          id: 50,
+          patientId: 7,
+          type: 'APPOINTMENT',
+          entryDate: new Date('2026-08-10T14:00:00.000Z'),
+          content: 'Registro histórico de paciente inativo.',
+        },
+      ];
+
+      prisma.medicalRecordEntry.findMany.mockResolvedValue(entries);
+
+      const result = await service.findAll(7, {});
+
+      expect(prisma.patient.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 7,
+        },
+      });
+
+      expect(result).toEqual(entries);
+    });
+
     it('should throw NotFoundException when patient does not exist', async () => {
       prisma.patient.findFirst.mockResolvedValue(null);
 

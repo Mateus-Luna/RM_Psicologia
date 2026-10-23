@@ -217,16 +217,14 @@ export function PatientDetailsPage({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {patient.isActive && (
-              <Link
-                to={`/patients/${patient.id}/edit`}
-                className="btn btn-secondary btn-sm"
-                id="edit-patient-btn"
-              >
-                <Pencil size={15} />
-                <span>Editar paciente</span>
-              </Link>
-            )}
+            <Link
+              to={`/patients/${patient.id}/edit`}
+              className="btn btn-secondary btn-sm"
+              id="edit-patient-btn"
+            >
+              <Pencil size={15} />
+              <span>Editar paciente</span>
+            </Link>
 
             {patient.isActive ? (
               <button

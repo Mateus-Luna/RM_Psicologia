@@ -496,9 +496,7 @@ function apiMockPlugin(): Plugin {
 
       if (method === 'PATCH') {
         const list = getPatients()
-        const idx = list.findIndex(
-          (p) => p.id === targetId && p.isActive !== false,
-        )
+        const idx = list.findIndex((p) => p.id === targetId)
         if (idx === -1) {
           return sendJson(res, 404, { message: 'Paciente não encontrado.' })
         }

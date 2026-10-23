@@ -123,10 +123,10 @@ export function PatientTable({
                         <ClipboardList size={17} />
                       </Link>
                       <Link
-                        to={`/patients/${patient.id}`}
+                        to={`/patients/${patient.id}?tab=cadastral`}
                         className="btn-icon"
                         id={`view-patient-${patient.id}`}
-                        title="Ver perfil"
+                        title="Ver ficha cadastral"
                       >
                         <Eye size={17} />
                       </Link>

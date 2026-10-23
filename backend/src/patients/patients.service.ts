@@ -309,7 +309,6 @@ async findOne(id: number) {
 const patient = await this.prisma.patient.findFirst({
 where: {
 id,
-isActive: true,
 },
 include: {
 medications: {
@@ -351,7 +350,6 @@ generalNotes,
 const patient = await this.prisma.patient.findFirst({
   where: {
     id,
-    isActive: true,
   },
   include: {
     medications: true,
@@ -593,7 +591,11 @@ return this.decryptPatient(activatedPatient);
 }
 
 async remove(id: number) {
-await this.findOne(id);
+const patient = await this.findOne(id);
+
+if (!patient.isActive) {
+  throw new NotFoundException('Paciente não encontrado.');
+}
 
 return this.prisma.$transaction(async (tx) => {
   const now = new Date();

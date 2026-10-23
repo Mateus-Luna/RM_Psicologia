@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ClipboardList,
   Eye,
+  Pencil,
   Search,
   UserCheck,
   UserX,
@@ -235,17 +236,25 @@ export function InactivePatientsPage() {
                             to={`/patients/${patient.id}?tab=prontuario`}
                             className="btn-icon"
                             id={`prontuario-inactive-${patient.id}`}
-                            title="Consultar histórico de prontuários"
+                            title="Acessar prontuário"
                           >
                             <ClipboardList size={17} />
                           </Link>
                           <Link
-                            to={`/patients/${patient.id}`}
+                            to={`/patients/${patient.id}?tab=cadastral`}
                             className="btn-icon"
                             id={`view-inactive-${patient.id}`}
-                            title="Ver perfil cadastral"
+                            title="Ver ficha cadastral"
                           >
                             <Eye size={17} />
+                          </Link>
+                          <Link
+                            to={`/patients/${patient.id}/edit`}
+                            className="btn-icon"
+                            id={`edit-inactive-${patient.id}`}
+                            title="Editar ficha cadastral"
+                          >
+                            <Pencil size={17} />
                           </Link>
                           <button
                             type="button"

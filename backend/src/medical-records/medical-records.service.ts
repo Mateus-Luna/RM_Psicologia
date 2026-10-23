@@ -66,7 +66,6 @@ export class MedicalRecordsService {
     const patient = await this.prisma.patient.findFirst({
       where: {
         id: patientId,
-        isActive: true,
       },
     });
 
