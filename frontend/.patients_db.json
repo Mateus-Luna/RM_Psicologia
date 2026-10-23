@@ -43,7 +43,7 @@
     "hasMedicalFollowUp": true,
     "doctorName": "Stefan",
     "generalNotes": "sei la",
-    "isActive": true,
+    "isActive": false,
     "medications": [
       {
         "id": 1,

@@ -58,9 +58,13 @@ export function PatientDetailsPage({
   }
 
   useEffect(() => {
-    if (!patientId) return;
-
     async function loadPatient() {
+      if (!patientId || isNaN(patientId)) {
+        setLoading(false);
+        setError('Paciente não encontrado.');
+        return;
+      }
+
       setLoading(true);
       setError('');
 
