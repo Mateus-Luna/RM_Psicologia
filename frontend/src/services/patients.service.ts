@@ -37,6 +37,9 @@ export const patientsService = {
   },
 
   async getPatient(id: number): Promise<Patient> {
+  
+    console.log('Buscando paciente com ID:', id);
+
     const response = await api.get<Patient>(`/patients/${id}`);
     return response.data;
   },

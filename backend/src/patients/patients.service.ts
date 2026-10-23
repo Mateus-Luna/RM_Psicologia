@@ -305,30 +305,24 @@ return decryptedPatients;
 
 }
 
+
 async findOne(id: number) {
-const patient = await this.prisma.patient.findFirst({
-where: {
-id,
-},
-include: {
-medications: {
-where: {
-isActive: true,
-},
-},
-},
-});
+  const patient = await this.prisma.patient.findUnique({
+    where: { id },
+    include: {
+      medications: {
+        where: { isActive: true },
+      },
+    },
+  });
 
+  if (!patient) {
+    throw new NotFoundException('Paciente não encontrado.');
+  }
 
-if (!patient) {
-  throw new NotFoundException(
-    'Paciente não encontrado.',
-  );
+  return this.decryptPatient(patient);
 }
 
-return this.decryptPatient(patient);
-
-}
 
 async update(
 id: number,
@@ -594,7 +588,7 @@ async remove(id: number) {
 const patient = await this.findOne(id);
 
 if (!patient.isActive) {
-  throw new NotFoundException('Paciente não encontrado.');
+  throw new NotFoundException('Paciente não encont=rado.');
 }
 
 return this.prisma.$transaction(async (tx) => {

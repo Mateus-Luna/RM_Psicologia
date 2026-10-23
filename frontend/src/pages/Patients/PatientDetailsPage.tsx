@@ -70,6 +70,11 @@ export function PatientDetailsPage({
 
       try {
         const data = await patientsService.getPatient(patientId!);
+
+        if (!data || typeof data !== 'object' || data.id == null) {
+          throw new Error('A API não retornou um paciente válido.');
+        }
+
         setPatient(data);
       } catch (err: unknown) {
         const msg =
