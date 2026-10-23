@@ -235,7 +235,7 @@ export function InactivePatientsPage() {
                             to={`/patients/${patient.id}?tab=prontuario`}
                             className="btn-icon"
                             id={`prontuario-inactive-${patient.id}`}
-                            title="Consultar prontuário histórico"
+                            title="Consultar histórico de prontuários"
                           >
                             <ClipboardList size={17} />
                           </Link>

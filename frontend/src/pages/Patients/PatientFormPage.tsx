@@ -297,7 +297,7 @@ export function PatientFormPage() {
                 </div>
 
                 <div className="form-field">
-                  <label htmlFor="patient-cpf">CPF (opcional)</label>
+                  <label htmlFor="patient-cpf">CPF </label>
                   <input
                     id="patient-cpf"
                     type="text"
