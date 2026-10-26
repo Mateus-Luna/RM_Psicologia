@@ -126,6 +126,19 @@ function parseBody(req: IncomingMessage): Promise<unknown> {
   })
 }
 
+function parseRawBody(req: IncomingMessage): Promise<Buffer> {
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = []
+    req.on('data', (chunk: Buffer | string) => {
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+    })
+    req.on('end', () => {
+      resolve(Buffer.concat(chunks))
+    })
+    req.on('error', () => resolve(Buffer.alloc(0)))
+  })
+}
+
 function sendJson(res: ServerResponse, status: number, data: unknown) {
   res.statusCode = status
   res.setHeader('Content-Type', 'application/json')
@@ -219,6 +232,97 @@ function apiMockPlugin(): Plugin {
     const parsedUrl = new URL(rawUrl, 'http://localhost:3000')
     const pathname = parsedUrl.pathname
     const method = (req.method || 'GET').toUpperCase()
+
+    // 0. BACKUP & RESTORE ROUTES
+    if (pathname === '/backup' && method === 'GET') {
+      const now = new Date()
+      const date = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0'),
+      ].join('-')
+      const time = [
+        String(now.getHours()).padStart(2, '0'),
+        String(now.getMinutes()).padStart(2, '0'),
+        String(now.getSeconds()).padStart(2, '0'),
+      ].join('-')
+      const filename = `PsiFicha-Backup-${date}-${time}.db`
+
+      const backupData = {
+        app: 'PsiFicha',
+        version: '1.0.0',
+        exportedAt: now.toISOString(),
+        user: getUser(),
+        patients: getPatients(),
+        medicalRecords: getMedicalRecords(),
+        appointments: getAppointments(),
+      }
+
+      const jsonStr = JSON.stringify(backupData, null, 2)
+      const buffer = Buffer.from(jsonStr, 'utf-8')
+
+      res.statusCode = 200
+      res.setHeader('Content-Type', 'application/x-sqlite3')
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+      res.setHeader('Content-Length', buffer.length.toString())
+      res.setHeader('Cache-Control', 'no-store')
+      return res.end(buffer)
+    }
+
+    if (pathname === '/backup/restore' && method === 'POST') {
+      const rawBuffer = await parseRawBody(req)
+      const rawStr = rawBuffer.toString('utf-8')
+
+      let parsedBackup: Record<string, unknown> | null = null
+
+      try {
+        parsedBackup = JSON.parse(rawStr) as Record<string, unknown>
+      } catch {
+        // Look for JSON within multipart boundary
+        const jsonMatch = rawStr.match(/\{[\s\S]*"app"\s*:\s*"PsiFicha"[\s\S]*\}/)
+        if (jsonMatch) {
+          try {
+            parsedBackup = JSON.parse(jsonMatch[0]) as Record<string, unknown>
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      if (parsedBackup && (parsedBackup.patients || parsedBackup.user)) {
+        if (parsedBackup.user && typeof parsedBackup.user === 'object') {
+          saveUser(parsedBackup.user as Record<string, unknown>)
+        }
+        if (Array.isArray(parsedBackup.patients)) {
+          savePatients(parsedBackup.patients as MockPatient[])
+        }
+        if (Array.isArray(parsedBackup.medicalRecords)) {
+          saveMedicalRecords(parsedBackup.medicalRecords as MockMedicalRecordEntry[])
+        }
+        if (Array.isArray(parsedBackup.appointments)) {
+          saveAppointments(parsedBackup.appointments as MockAppointment[])
+        }
+
+        const now = new Date()
+        const safetyFilename = `safety-backup-${now.getTime()}.db`
+
+        return sendJson(res, 200, {
+          message: 'Backup restaurado com sucesso!',
+          safetyBackupFilename: safetyFilename,
+        })
+      }
+
+      if (rawStr.includes('SQLite format 3')) {
+        return sendJson(res, 200, {
+          message: 'Banco de dados verificado e restaurado com sucesso!',
+          safetyBackupFilename: `safety-backup-${Date.now()}.db`,
+        })
+      }
+
+      return sendJson(res, 400, {
+        message: 'O arquivo informado não contém dados válidos de backup do PsiFicha.',
+      })
+    }
 
     // 1. AUTH ROUTES
     if (pathname === '/auth/setup-status' && method === 'GET') {

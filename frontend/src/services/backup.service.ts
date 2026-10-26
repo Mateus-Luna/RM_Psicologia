@@ -56,36 +56,50 @@ export const backupService = {
     }
   }
 
-  if (!window.backupAPI) {
-    throw new Error(
-      'A funcionalidade de salvamento de backup do aplicativo não está disponível.',
-    );
-  }
+    if (window.backupAPI) {
+      const result = await window.backupAPI.saveBackup(
+        response.data,
+        filename,
+      );
 
-  const result = await window.backupAPI.saveBackup(
-    response.data,
-    filename,
-  );
+      if (result.canceled) {
+        return {
+          filename,
+          canceled: true,
+        };
+      }
 
-  if (result.canceled) {
+      if (!result.success) {
+        throw new Error(
+          result.error ||
+            'Não foi possível salvar o backup.',
+        );
+      }
+
+      return {
+        filename,
+        canceled: false,
+      };
+    }
+
+    // Web / browser environment fallback: trigger browser download
+    const blob = new Blob([response.data], {
+      type: 'application/octet-stream',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
     return {
       filename,
-      canceled: true,
+      canceled: false,
     };
-  }
-
-  if (!result.success) {
-    throw new Error(
-      result.error ||
-        'Não foi possível salvar o backup.',
-    );
-  }
-
-  return {
-    filename,
-    canceled: false,
-  };
-},
+  },
 
   async restoreBackup(file: File): Promise<RestoreBackupResponse> {
     const formData = new FormData();

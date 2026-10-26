@@ -16,7 +16,7 @@ declare global {
       }>;
     };
 
-    backupAPI: {
+    backupAPI?: {
       saveBackup: (
         buffer: ArrayBuffer,
         filename: string,
