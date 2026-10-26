@@ -15,6 +15,8 @@ export interface Patient {
   name: string;
   cpf?: string | null;
   phone: string;
+  guardianName?: string | null;
+  guardianPhone?: string | null;
   birthDate: string;
   treatmentStartDate: string;
   diagnosticHypothesis?: string | null;
@@ -45,6 +47,8 @@ export interface CreatePatientPayload {
   name: string;
   cpf?: string;
   phone: string;
+  guardianName?: string;
+  guardianPhone?: string;
   birthDate: string;
   treatmentStartDate: string;
   diagnosticHypothesis?: string;
@@ -58,6 +62,8 @@ export interface UpdatePatientPayload {
   name?: string;
   cpf?: string;
   phone?: string;
+  guardianName?: string;
+  guardianPhone?: string;
   birthDate?: string;
   treatmentStartDate?: string;
   diagnosticHypothesis?: string;

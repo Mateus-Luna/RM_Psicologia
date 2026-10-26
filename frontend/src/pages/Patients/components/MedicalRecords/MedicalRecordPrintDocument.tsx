@@ -118,6 +118,18 @@ export function MedicalRecordPrintDocument({
                 : 'Não'}
             </span>
           </div>
+          {patient.guardianName && (
+            <div>
+              <span className="print-label">Responsável Legal:</span>
+              <span className="print-value">{patient.guardianName}</span>
+            </div>
+          )}
+          {patient.guardianPhone && (
+            <div>
+              <span className="print-label">Contato do Responsável:</span>
+              <span className="print-value">{formatPhone(patient.guardianPhone)}</span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -156,6 +168,39 @@ export function MedicalRecordPrintDocument({
 
                 <div className="print-entry-body">
                   <p className="print-entry-content">{entry.content}</p>
+
+                  {entry.attachments && entry.attachments.length > 0 && (
+                    <div className="print-entry-attachments">
+                      <p className="print-attachments-title">
+                        Anexos registrados ({entry.attachments.length}):
+                      </p>
+                      <div className="print-attachments-grid">
+                        {entry.attachments.map((att) => {
+                          const isImg = att.type?.startsWith('image/');
+                          return (
+                            <div key={att.id} className="print-attachment-item">
+                              {isImg ? (
+                                <div className="print-img-box">
+                                  <img
+                                    src={att.dataUrl}
+                                    alt={att.name}
+                                    className="print-attachment-img"
+                                  />
+                                  <span className="print-attachment-caption">
+                                    {att.name}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="print-attachment-doc">
+                                  [Documento] {att.name}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="print-entry-footer">

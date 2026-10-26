@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 
 import { MedicalRecordEntryType } from '../../../generated/prisma/enums';
 
@@ -12,4 +12,8 @@ export class CreateMedicalRecordEntryDto {
   @IsString()
   @MinLength(1)
   content!: string;
+
+  @IsOptional()
+  @IsArray()
+  attachments?: any[];
 }

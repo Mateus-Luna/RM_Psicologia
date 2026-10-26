@@ -1,6 +1,16 @@
-import { useState } from 'react';
-import { FileText, Stethoscope, X } from 'lucide-react';
-import type { MedicalRecordEntry } from '../../../../types/medical-record';
+import { useRef, useState } from 'react';
+import {
+  FileText,
+  Paperclip,
+  Stethoscope,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
+import type {
+  MedicalRecordAttachment,
+  MedicalRecordEntry,
+} from '../../../../types/medical-record';
 import { MedicalRecordEntryType } from '../../../../types/medical-record';
 import {
   combineDateAndTime,
@@ -19,6 +29,7 @@ interface MedicalRecordModalProps {
     type: MedicalRecordEntryType;
     entryDate: string;
     content: string;
+    attachments?: MedicalRecordAttachment[];
   }) => Promise<void>;
 }
 
@@ -49,13 +60,68 @@ export function MedicalRecordModal({
   const [content, setContent] = useState<string>(
     () => entryToEdit?.content ?? '',
   );
+  const [attachments, setAttachments] = useState<MedicalRecordAttachment[]>(
+    () => entryToEdit?.attachments ?? [],
+  );
   const [validationError, setValidationError] = useState('');
+  const [fileError, setFileError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
+
+  function handleFileSelect(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setFileError('');
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB limit per file
+
+    Array.from(files).forEach((file) => {
+      if (file.size > MAX_SIZE) {
+        setFileError(`O arquivo "${file.name}" excede o limite máximo de 10 MB.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        const newAttachment: MedicalRecordAttachment = {
+          id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          name: file.name,
+          size: file.size,
+          type: file.type || 'application/octet-stream',
+          dataUrl,
+          uploadedAt: new Date().toISOString(),
+        };
+
+        setAttachments((prev) => [...prev, newAttachment]);
+      };
+
+      reader.onerror = () => {
+        setFileError(`Erro ao ler o arquivo "${file.name}". Tente novamente.`);
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
+  function handleRemoveAttachment(id: string) {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  }
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError('');
+    setFileError('');
 
     if (!date) {
       setValidationError('Por favor, informe a data do registro.');
@@ -73,6 +139,7 @@ export function MedicalRecordModal({
       type,
       entryDate: isoEntryDate,
       content: content.trim(),
+      attachments,
     });
   }
 
@@ -89,7 +156,7 @@ export function MedicalRecordModal({
         id="medical-record-modal"
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxHeight: '90vh',
+          maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -123,9 +190,9 @@ export function MedicalRecordModal({
         </div>
 
         {/* ERROR ALERTS */}
-        {(validationError || backendError) && (
+        {(validationError || backendError || fileError) && (
           <div className="alert alert-danger" id="medical-record-modal-error">
-            <span>{validationError || backendError}</span>
+            <span>{validationError || backendError || fileError}</span>
           </div>
         )}
 
@@ -237,7 +304,7 @@ export function MedicalRecordModal({
             <textarea
               id="record-content-input"
               className="form-textarea record-textarea"
-              rows={12}
+              rows={10}
               placeholder="Descreva a evolução da sessão, relatos do paciente, observações sobre humor e afeto, intervenções clínicas realizadas, encaminhamentos e planejamento terapêutico..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -254,8 +321,135 @@ export function MedicalRecordModal({
             </span>
           </div>
 
+          {/* UPLOAD DE ANEXOS E IMAGENS */}
+          <div className="form-field" style={{ marginTop: '16px' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Paperclip size={16} color="var(--primary)" />
+                <span>Anexos e Imagens Externas</span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                    fontWeight: 400,
+                  }}
+                >
+                  (Opcional)
+                </span>
+              </span>
+              {attachments.length > 0 && (
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--primary)',
+                  }}
+                >
+                  {attachments.length}{' '}
+                  {attachments.length === 1 ? 'anexo' : 'anexos'}
+                </span>
+              )}
+            </label>
+
+            <input
+              ref={fileInputRef}
+              id="record-file-input"
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.txt"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileSelect(e.target.files)}
+            />
+
+            {/* DROPZONE */}
+            <div
+              className={`record-dropzone ${isDragging ? 'dragging' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                handleFileSelect(e.dataTransfer.files);
+              }}
+              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  fileInputRef.current?.click();
+                }
+              }}
+            >
+              <div className="dropzone-icon-circle">
+                <Upload size={20} color="var(--primary)" />
+              </div>
+              <div className="dropzone-text">
+                <span className="dropzone-title">
+                  Clique para anexar ou arraste arquivos aqui
+                </span>
+                <span className="dropzone-sub">
+                  Suporta imagens (PNG, JPG, WEBP), laudos (PDF), documentos e anotações (até 10 MB)
+                </span>
+              </div>
+            </div>
+
+            {/* ATTACHMENTS LIST */}
+            {attachments.length > 0 && (
+              <div className="record-attachments-list" id="record-attachments-preview">
+                {attachments.map((att) => {
+                  const isImage = att.type.startsWith('image/');
+                  return (
+                    <div key={att.id} className="attachment-chip">
+                      {isImage ? (
+                        <img
+                          src={att.dataUrl}
+                          alt={att.name}
+                          className="attachment-thumb"
+                        />
+                      ) : (
+                        <div className="attachment-doc-icon">
+                          <FileText size={18} color="var(--primary)" />
+                        </div>
+                      )}
+
+                      <div className="attachment-info">
+                        <span className="attachment-name" title={att.name}>
+                          {att.name}
+                        </span>
+                        <span className="attachment-size">
+                          {formatFileSize(att.size)}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="attachment-remove-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveAttachment(att.id);
+                        }}
+                        title="Remover anexo"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* ACTIONS */}
-          <div className="modal-footer" style={{ marginTop: '12px' }}>
+          <div className="modal-footer" style={{ marginTop: '16px' }}>
             <button
               type="button"
               className="btn btn-secondary"

@@ -37,6 +37,8 @@ export function PatientFormPage() {
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
   const [phone, setPhone] = useState('');
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [treatmentStartDate, setTreatmentStartDate] = useState('');
 
@@ -66,6 +68,8 @@ export function PatientFormPage() {
         setName(data.name);
         setCpf(data.cpf ? formatCPF(data.cpf) : '');
         setPhone(formatPhone(data.phone));
+        setGuardianName(data.guardianName ?? '');
+        setGuardianPhone(data.guardianPhone ? formatPhone(data.guardianPhone) : '');
         setBirthDate(toInputDate(data.birthDate));
         setTreatmentStartDate(toInputDate(data.treatmentStartDate));
         setDiagnosticHypothesis(data.diagnosticHypothesis ?? '');
@@ -140,12 +144,15 @@ export function PatientFormPage() {
     try {
       const unmaskedCpf = cleanCPF(cpf);
       const unmaskedPhone = cleanPhone(phone);
+      const unmaskedGuardianPhone = guardianPhone ? cleanPhone(guardianPhone) : undefined;
 
       if (isEditing && patientId) {
         const payload: UpdatePatientPayload = {
           name: name.trim(),
           cpf: unmaskedCpf || undefined,
           phone: unmaskedPhone,
+          guardianName: guardianName.trim() || undefined,
+          guardianPhone: unmaskedGuardianPhone || undefined,
           birthDate,
           treatmentStartDate,
           diagnosticHypothesis: diagnosticHypothesis.trim() || undefined,
@@ -167,6 +174,8 @@ export function PatientFormPage() {
           name: name.trim(),
           cpf: unmaskedCpf || undefined,
           phone: unmaskedPhone,
+          guardianName: guardianName.trim() || undefined,
+          guardianPhone: unmaskedGuardianPhone || undefined,
           birthDate,
           treatmentStartDate,
           diagnosticHypothesis: diagnosticHypothesis.trim() || undefined,
@@ -369,6 +378,81 @@ export function PatientFormPage() {
                       {errors.treatmentStartDate}
                     </span>
                   )}
+                </div>
+              </div>
+
+              {/* RESPONSÁVEL LEGAL (OPCIONAL) */}
+              <div
+                style={{
+                  marginTop: '1.25rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px dashed var(--border, #e2e8f0)',
+                }}
+              >
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <span
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <span>Responsável Legal</span>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 400,
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      (Opcional)
+                    </span>
+                  </span>
+                  <p
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)',
+                      margin: '2px 0 0 0',
+                    }}
+                  >
+                    Preencha caso o paciente seja menor de idade ou possua responsável legal / contato de emergência.
+                  </p>
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-field">
+                    <label htmlFor="patient-guardian-name">
+                      Nome do responsável
+                    </label>
+                    <input
+                      id="patient-guardian-name"
+                      type="text"
+                      className="form-input"
+                      placeholder="Ex: Maria Aparecida (Mãe)"
+                      value={guardianName}
+                      onChange={(e) => setGuardianName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label htmlFor="patient-guardian-phone">
+                      Contato do responsável
+                    </label>
+                    <input
+                      id="patient-guardian-phone"
+                      type="text"
+                      className="form-input"
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
+                      value={guardianPhone}
+                      onChange={(e) =>
+                        setGuardianPhone(formatPhone(e.target.value))
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             </div>

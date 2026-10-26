@@ -18,6 +18,8 @@ interface MockPatient {
   name: string
   cpf?: string | null
   phone: string
+  guardianName?: string | null
+  guardianPhone?: string | null
   birthDate: string
   treatmentStartDate: string
   diagnosticHypothesis?: string | null
@@ -30,12 +32,22 @@ interface MockPatient {
   updatedAt?: string
 }
 
+interface MockAttachment {
+  id: string
+  name: string
+  size: number
+  type: string
+  dataUrl: string
+  uploadedAt: string
+}
+
 interface MockMedicalRecordEntry {
   id: number
   patientId: number
   type: 'APPOINTMENT' | 'GENERAL_NOTE'
   entryDate: string
   content: string
+  attachments?: MockAttachment[]
   createdAt: string
   updatedAt: string
 }
@@ -68,6 +80,8 @@ interface PatientPayload {
   name?: string
   cpf?: string | null
   phone?: string
+  guardianName?: string | null
+  guardianPhone?: string | null
   birthDate?: string
   treatmentStartDate?: string
   diagnosticHypothesis?: string | null
@@ -87,6 +101,7 @@ interface MedicalRecordPayload {
   type?: 'APPOINTMENT' | 'GENERAL_NOTE'
   entryDate?: string
   content?: string
+  attachments?: MockAttachment[]
 }
 
 interface AuthPayload {
@@ -291,6 +306,7 @@ function apiMockPlugin(): Plugin {
           ...(data.type !== undefined && { type: data.type }),
           ...(data.entryDate !== undefined && { entryDate: data.entryDate }),
           ...(data.content !== undefined && { content: data.content }),
+          ...(data.attachments !== undefined && { attachments: data.attachments }),
           updatedAt: new Date().toISOString(),
         }
         saveMedicalRecords(records)
@@ -378,6 +394,7 @@ function apiMockPlugin(): Plugin {
           type: data.type || 'APPOINTMENT',
           entryDate: data.entryDate || new Date().toISOString(),
           content: data.content.trim(),
+          attachments: data.attachments || [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }
@@ -638,6 +655,8 @@ function apiMockPlugin(): Plugin {
           name: data.name || '',
           cpf: data.cpf || null,
           phone: data.phone || '',
+          guardianName: data.guardianName || null,
+          guardianPhone: data.guardianPhone || null,
           birthDate: data.birthDate || '',
           treatmentStartDate: data.treatmentStartDate || '',
           diagnosticHypothesis: data.diagnosticHypothesis || null,

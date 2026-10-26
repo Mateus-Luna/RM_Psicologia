@@ -31,6 +31,9 @@ model Patient {
 
   phone String
 
+  guardianName String?
+  guardianPhone String?
+
   birthDate DateTime
   treatmentStartDate DateTime
 
@@ -81,6 +84,7 @@ model MedicalRecordEntry {
 
   entryDate DateTime
   content String
+  attachments String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

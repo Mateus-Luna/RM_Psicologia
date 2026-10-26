@@ -20,6 +20,14 @@ export class UpdatePatientDto {
   phone?: string;
 
   @IsOptional()
+  @IsString()
+  guardianName?: string;
+
+  @IsOptional()
+  @IsString()
+  guardianPhone?: string;
+
+  @IsOptional()
   @IsDateString()
   birthDate?: string;
 

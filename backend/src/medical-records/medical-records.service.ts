@@ -19,12 +19,26 @@ export class MedicalRecordsService {
   ) {}
 
   private decryptEntry(entry: any) {
+    let parsedAttachments: any[] = [];
+    if (entry.attachments) {
+      try {
+        const decryptedAttachments = this.cryptoService.decrypt(entry.attachments);
+        parsedAttachments = typeof decryptedAttachments === 'string'
+          ? JSON.parse(decryptedAttachments)
+          : decryptedAttachments;
+      } catch {
+        parsedAttachments = [];
+      }
+    }
+
     return {
       ...entry,
 
       content: entry.content
         ? this.cryptoService.decrypt(entry.content)
         : entry.content,
+
+      attachments: Array.isArray(parsedAttachments) ? parsedAttachments : [],
     };
   }
 
@@ -53,6 +67,13 @@ export class MedicalRecordsService {
           content: this.cryptoService.encrypt(
             createDto.content,
           ),
+
+          attachments:
+            createDto.attachments && createDto.attachments.length
+              ? this.cryptoService.encrypt(
+                  JSON.stringify(createDto.attachments),
+                )
+              : undefined,
         },
       });
 
@@ -169,6 +190,15 @@ export class MedicalRecordsService {
             content: this.cryptoService.encrypt(
               updateDto.content,
             ),
+          }),
+
+          ...(updateDto.attachments !== undefined && {
+            attachments:
+              updateDto.attachments && updateDto.attachments.length
+                ? this.cryptoService.encrypt(
+                    JSON.stringify(updateDto.attachments),
+                  )
+                : null,
           }),
         },
       });

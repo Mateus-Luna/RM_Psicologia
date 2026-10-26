@@ -26,6 +26,14 @@ export class CreatePatientDto {
   @MinLength(8)
   phone!: string;
 
+  @IsOptional()
+  @IsString()
+  guardianName?: string;
+
+  @IsOptional()
+  @IsString()
+  guardianPhone?: string;
+
   @IsDateString()
   birthDate!: string;
 

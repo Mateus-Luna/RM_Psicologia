@@ -424,6 +424,38 @@ export function PatientDetailsPage({
                     <span>{formatDate(patient.treatmentStartDate)}</span>
                   </span>
                 </div>
+
+                <div className="detail-item">
+                  <span className="detail-label">Responsável Legal</span>
+                  <span className="detail-value">
+                    {patient.guardianName ? (
+                      patient.guardianName
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        Não informado
+                      </span>
+                    )}
+                  </span>
+                </div>
+
+                <div className="detail-item">
+                  <span className="detail-label">Contato do Responsável</span>
+                  <span
+                    className="detail-value"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    {patient.guardianPhone ? (
+                      <>
+                        <Phone size={14} color="var(--text-muted)" />
+                        <span>{formatPhone(patient.guardianPhone)}</span>
+                      </>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        Não informado
+                      </span>
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
 

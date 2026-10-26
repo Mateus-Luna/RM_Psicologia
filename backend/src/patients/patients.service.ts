@@ -56,6 +56,14 @@ return {
     ? this.cryptoService.decrypt(patient.phone)
     : patient.phone,
 
+  guardianName: patient.guardianName
+    ? this.cryptoService.decrypt(patient.guardianName)
+    : patient.guardianName,
+
+  guardianPhone: patient.guardianPhone
+    ? this.cryptoService.decrypt(patient.guardianPhone)
+    : patient.guardianPhone,
+
   diagnosticHypothesis:
     patient.diagnosticHypothesis
       ? this.cryptoService.decrypt(
@@ -93,6 +101,8 @@ treatmentStartDate,
 cpf,
 name,
 phone,
+guardianName,
+guardianPhone,
 diagnosticHypothesis,
 doctorName,
 generalNotes,
@@ -120,6 +130,16 @@ try {
         : undefined,
 
       phone: this.cryptoService.encrypt(phone),
+
+      guardianName:
+        guardianName !== undefined && guardianName !== null && guardianName.trim()
+          ? this.cryptoService.encrypt(guardianName.trim())
+          : undefined,
+
+      guardianPhone:
+        guardianPhone !== undefined && guardianPhone !== null && guardianPhone.trim()
+          ? this.cryptoService.encrypt(guardianPhone.trim())
+          : undefined,
 
       diagnosticHypothesis:
         diagnosticHypothesis !== undefined &&
@@ -335,6 +355,8 @@ treatmentStartDate,
 cpf,
 name,
 phone,
+guardianName,
+guardianPhone,
 diagnosticHypothesis,
 doctorName,
 generalNotes,
@@ -381,6 +403,20 @@ try {
 
       ...(phone !== undefined && {
         phone: this.cryptoService.encrypt(phone),
+      }),
+
+      ...(guardianName !== undefined && {
+        guardianName:
+          guardianName && guardianName.trim()
+            ? this.cryptoService.encrypt(guardianName.trim())
+            : null,
+      }),
+
+      ...(guardianPhone !== undefined && {
+        guardianPhone:
+          guardianPhone && guardianPhone.trim()
+            ? this.cryptoService.encrypt(guardianPhone.trim())
+            : null,
       }),
 
       ...(diagnosticHypothesis !== undefined && {
@@ -588,7 +624,7 @@ async remove(id: number) {
 const patient = await this.findOne(id);
 
 if (!patient.isActive) {
-  throw new NotFoundException('Paciente não encont=rado.');
+  throw new NotFoundException('Paciente não encontrado.');
 }
 
 return this.prisma.$transaction(async (tx) => {

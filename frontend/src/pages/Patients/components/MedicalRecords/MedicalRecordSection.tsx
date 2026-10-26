@@ -9,7 +9,10 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import type { Patient } from '../../../../types/patient';
-import type { MedicalRecordEntry } from '../../../../types/medical-record';
+import type {
+  MedicalRecordAttachment,
+  MedicalRecordEntry,
+} from '../../../../types/medical-record';
 import { MedicalRecordEntryType } from '../../../../types/medical-record';
 import { medicalRecordsService } from '../../../../services/medical-records.service';
 import { MedicalRecordFilters } from './MedicalRecordFilters';
@@ -147,6 +150,7 @@ export function MedicalRecordSection({
     type: MedicalRecordEntryType;
     entryDate: string;
     content: string;
+    attachments?: MedicalRecordAttachment[];
   }) {
     setModalLoading(true);
     setModalError('');
