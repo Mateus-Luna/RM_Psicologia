@@ -55,23 +55,19 @@ export function Sidebar({ onLogout }: SidebarProps) {
   useEffect(() => {
     async function loadLogo() {
       try {
-        const result =
-          await window.logoAPI?.getLogo?.();
-
-        if (
-          result?.exists &&
-          result.data &&
-          result.mimeType
-        ) {
-          setLogoSrc(
-            `data:${result.mimeType};base64,${result.data}`,
-          );
+        if (window.logoAPI?.getLogo) {
+          const result = await window.logoAPI.getLogo();
+          if (result?.exists && result.data && result.mimeType) {
+            setLogoSrc(`data:${result.mimeType};base64,${result.data}`);
+            return;
+          }
+        }
+        const savedLogo = localStorage.getItem('psificha_custom_logo');
+        if (savedLogo) {
+          setLogoSrc(savedLogo);
         }
       } catch (error) {
-        console.error(
-          'Erro ao carregar logomarca:',
-          error,
-        );
+        console.error('Erro ao carregar logomarca:', error);
       }
     }
 
@@ -80,11 +76,29 @@ export function Sidebar({ onLogout }: SidebarProps) {
 
   async function handleLogoClick() {
     try {
-      const result = await window.logoAPI.selectLogo();
-
-      if (result?.success) {
-        window.location.reload();
+      if (window.logoAPI?.selectLogo) {
+        const result = await window.logoAPI.selectLogo();
+        if (result?.success) {
+          window.location.reload();
+        }
+        return;
       }
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          localStorage.setItem('psificha_custom_logo', dataUrl);
+          setLogoSrc(dataUrl);
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
     } catch (error) {
       console.error('Erro ao selecionar logomarca:', error);
     }
